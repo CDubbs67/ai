@@ -1,85 +1,95 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Ask any question and get instant answers. A beautiful Q&A search engine for general knowledge.">
-  <title>AskNova — Instant Answers</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Ask any question and get instant answers. A beautiful Q&A search engine for general knowledge.">
+    <title>AskNova — Instant Answers</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-  <div class="bg-orbs">
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
-    <div class="orb orb-3"></div>
-  </div>
+    <div class="bg-orbs">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
 
-  <main id="app">
-    <header class="header" id="header">
-      <div class="logo">
-        <span class="logo-icon">✦</span>
-        <span class="logo-text">AskNova</span>
-      </div>
-    </header>
+    <main id="app">
+        <header class="header" id="header">
+            <a href="index.html" class="logo"
+                style="text-decoration:none;color:inherit;display:flex;align-items:center;gap:10px;">
+                <span class="logo-icon">✦</span>
+                <span class="logo-text">AskNova</span>
+            </a>
+            <nav
+                style="display:flex;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:30px;padding:4px;">
+                <a href="index.html"
+                    style="font-family:inherit;font-size:0.85rem;font-weight:500;text-decoration:none;padding:8px 18px;border-radius:26px;background:linear-gradient(135deg,var(--gradient-1),var(--gradient-2));color:white;">Search</a>
+                <a href="review.html"
+                    style="font-family:inherit;font-size:0.85rem;font-weight:500;text-decoration:none;padding:8px 18px;border-radius:26px;color:var(--text-muted);transition:var(--transition);">Review</a>
+            </nav>
+        </header>
 
-    <section class="hero" id="hero">
-      <h1 class="hero-title">Ask me <span class="gradient-text">anything</span></h1>
-      <p class="hero-subtitle">Get instant answers to your questions — capitals, science, history, and more.</p>
+        <section class="hero" id="hero">
+            <h1 class="hero-title">Ask me <span class="gradient-text">anything</span></h1>
+            <p class="hero-subtitle">Get instant answers to your questions — capitals, science, history, and more.</p>
 
-      <div class="search-container" id="search-container">
-        <div class="search-bar" id="search-bar">
-          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="11" cy="11" r="8"/>
-            <path d="m21 21-4.3-4.3"/>
-          </svg>
-          <input
-            type="text"
-            id="search-input"
-            class="search-input"
-            placeholder="e.g. What is the capital of Florida?"
-            autocomplete="off"
-            autofocus
-          />
-          <button class="search-btn" id="search-btn" aria-label="Search">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <path d="M5 12h14M12 5l7 7-7 7"/>
-            </svg>
-          </button>
-        </div>
-        <div class="suggestions" id="suggestions">
-          <span class="suggestion-label">Try asking:</span>
-          <button class="suggestion-chip" data-query="What is the capital of France?">Capital of France</button>
-          <button class="suggestion-chip" data-query="Who painted the Mona Lisa?">Who painted the Mona Lisa?</button>
-          <button class="suggestion-chip" data-query="What is the largest planet?">Largest planet</button>
-          <button class="suggestion-chip" data-query="How many bones are in the human body?">Bones in the human body</button>
-        </div>
-      </div>
-    </section>
+            <div class="search-container" id="search-container">
+                <div class="search-bar" id="search-bar">
+                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8" />
+                        <path d="m21 21-4.3-4.3" />
+                    </svg>
+                    <input type="text" id="search-input" class="search-input"
+                        placeholder="e.g. What is the capital of Florida?" autocomplete="off" autofocus />
+                    <button class="search-btn" id="search-btn" aria-label="Search">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path d="M5 12h14M12 5l7 7-7 7" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="suggestions" id="suggestions">
+                    <span class="suggestion-label">Try asking:</span>
+                    <button class="suggestion-chip" data-query="What is the capital of France?">Capital of
+                        France</button>
+                    <button class="suggestion-chip" data-query="Who painted the Mona Lisa?">Who painted the Mona
+                        Lisa?</button>
+                    <button class="suggestion-chip" data-query="What is the largest planet?">Largest planet</button>
+                    <button class="suggestion-chip" data-query="How many bones are in the human body?">Bones in the
+                        human body</button>
+                </div>
+            </div>
+        </section>
 
-    <section class="answer-section" id="answer-section">
-      <div class="answer-card" id="answer-card">
-        <div class="answer-header">
-          <div class="answer-icon">💡</div>
-          <h2 class="answer-question" id="answer-question"></h2>
-        </div>
-        <div class="answer-body" id="answer-body">
-          <p class="answer-text" id="answer-text"></p>
-        </div>
-        <div class="answer-footer">
-          <button class="ask-another-btn" id="ask-another-btn">Ask another question</button>
-        </div>
-      </div>
-    </section>
+        <section class="answer-section" id="answer-section">
+            <div class="answer-card" id="answer-card">
+                <div class="answer-header">
+                    <div class="answer-icon">💡</div>
+                    <h2 class="answer-question" id="answer-question"></h2>
+                </div>
+                <div class="answer-body" id="answer-body">
+                    <p class="answer-text" id="answer-text"></p>
+                </div>
+                <div class="answer-footer">
+                    <button class="ask-another-btn" id="ask-another-btn">Ask another question</button>
+                </div>
+            </div>
+        </section>
 
-    <section class="history-section" id="history-section">
-      <h3 class="history-title">Recent Questions</h3>
-      <div class="history-list" id="history-list"></div>
-    </section>
-  </main>
+        <section class="history-section" id="history-section">
+            <h3 class="history-title">Recent Questions</h3>
+            <div class="history-list" id="history-list"></div>
+        </section>
+    </main>
 
-  <script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
+
 </html>

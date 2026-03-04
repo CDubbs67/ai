@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Review and approve Wikipedia answers for AskNova.">
+    <title>AskNova — Review Answers</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="review.css">
+</head>
+
+<body>
+    <div class="bg-orbs">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <main id="app">
+        <header class="header">
+            <a href="index.html" class="logo">
+                <span class="logo-icon">✦</span>
+                <span class="logo-text">AskNova</span>
+            </a>
+            <nav class="nav-tabs">
+                <a href="index.html" class="nav-tab">Search</a>
+                <a href="review.html" class="nav-tab active">Review</a>
+            </nav>
+        </header>
+
+        <section class="review-hero">
+            <h1 class="review-title">Review <span class="gradient-text">Answers</span></h1>
+            <p class="review-subtitle">Approve or reject Wikipedia answers. Approved answers will be saved and reused
+                automatically.</p>
+
+            <div class="tab-bar" id="tab-bar">
+                <button class="tab active" data-tab="pending">Pending <span class="tab-count"
+                        id="pending-count">0</span></button>
+                <button class="tab" data-tab="approved">Approved <span class="tab-count"
+                        id="approved-count">0</span></button>
+                <button class="tab" data-tab="rejected">Rejected <span class="tab-count"
+                        id="rejected-count">0</span></button>
+            </div>
+        </section>
+
+        <section class="review-list" id="review-list">
+            <div class="empty-state" id="empty-state">
+                <div class="empty-icon">📭</div>
+                <p class="empty-text">No answers here yet.</p>
+                <p class="empty-hint">Ask a question on the <a href="index.html">search page</a> that isn't in the
+                    built-in knowledge base — the Wikipedia answer will show up here for review.</p>
+            </div>
+        </section>
+    </main>
+
+    <script src="review.js"></script>
+</body>
+
+</html>

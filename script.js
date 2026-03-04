@@ -158,6 +158,73 @@ function findAnswer(query) {
   return null;
 }
 
+// ===== Rephrase Wikipedia Text =====
+function rephraseWikipediaText(text, topic) {
+  if (!text) return text;
+
+  // Split into sentences
+  let sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
+
+  // Trim to at most 4 sentences to keep it concise
+  if (sentences.length > 4) {
+    sentences = sentences.slice(0, 4);
+  }
+
+  // Word swaps to make it sound less like a copy-paste
+  const synonymSwaps = [
+    [/\bis a\b/i, 'is known as'],
+    [/\bwas a\b/i, 'was'],
+    [/\bis an\b/i, 'is considered an'],
+    [/\bis the\b/i, 'happens to be the'],
+    [/\bRefers to\b/i, 'Is a term for'],
+    [/\bIt is\b/i, 'This is'],
+    [/\bThey are\b/i, 'These are'],
+    [/\bHe was\b/i, 'This person was'],
+    [/\bShe was\b/i, 'This person was'],
+    [/\bapproximately\b/i, 'around'],
+    [/\butilized\b/i, 'used'],
+    [/\bcommenced\b/i, 'started'],
+    [/\bnumerous\b/i, 'many'],
+    [/\bfrequently\b/i, 'often'],
+    [/\badditionally\b/i, 'also'],
+    [/\bprimarily\b/i, 'mainly'],
+    [/\bsubsequently\b/i, 'later'],
+    [/\bdemonstrated\b/i, 'showed'],
+  ];
+
+  // Apply a few random swaps (not all, to keep it natural)
+  let result = sentences.join('');
+  const swapsToApply = synonymSwaps
+    .filter(() => Math.random() > 0.5)
+    .slice(0, 4);
+
+  for (const [pattern, replacement] of swapsToApply) {
+    result = result.replace(pattern, replacement);
+  }
+
+  // Highlight the topic name in the answer
+  if (topic) {
+    const escapedTopic = topic.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const topicRegex = new RegExp(`\\b(${escapedTopic})\\b`, 'i');
+    result = result.replace(topicRegex, "<span class='highlight'>$1</span>");
+  }
+
+  // Pick a random conversational intro
+  const intros = [
+    "Here's what I found: ",
+    "Great question! ",
+    "Based on what I found: ",
+    "Here's the answer: ",
+    "So, ",
+    "From what I gathered: ",
+    "In short: ",
+    "Interesting one! ",
+  ];
+  const intro = intros[Math.floor(Math.random() * intros.length)];
+
+  return intro + result.trim();
+}
+
 async function fetchFromWikipedia(query) {
   try {
     const searchUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`;
@@ -176,7 +243,7 @@ async function fetchFromWikipedia(query) {
         if (summaryResponse.ok) {
           const summaryData = await summaryResponse.json();
           if (summaryData.extract) {
-            return summaryData.extract;
+            return { text: summaryData.extract, topic: title };
           }
         }
       }
@@ -185,13 +252,42 @@ async function fetchFromWikipedia(query) {
 
     const data = await response.json();
     if (data.extract) {
-      return data.extract;
+      return { text: data.extract, topic: data.title || query };
     }
     return null;
   } catch (err) {
     console.error('Wikipedia fetch failed:', err);
     return null;
   }
+}
+
+// ===== Approved Answer Lookup =====
+function findApprovedAnswer(query) {
+  const reviewData = JSON.parse(localStorage.getItem('askNovaReviewAnswers') || '[]');
+  const q = query.toLowerCase().trim();
+  const approved = reviewData.find(r =>
+    r.status === 'approved' && r.question.toLowerCase().trim() === q
+  );
+  return approved ? approved.answer : null;
+}
+
+function saveToReviewQueue(question, answer, topic) {
+  const reviewData = JSON.parse(localStorage.getItem('askNovaReviewAnswers') || '[]');
+
+  // Don't save duplicates — check if this question already exists
+  const exists = reviewData.some(r => r.question.toLowerCase().trim() === question.toLowerCase().trim());
+  if (exists) return;
+
+  reviewData.push({
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+    question: question,
+    answer: answer,
+    topic: topic || '',
+    status: 'pending',
+    timestamp: new Date().toISOString()
+  });
+
+  localStorage.setItem('askNovaReviewAnswers', JSON.stringify(reviewData));
 }
 
 async function handleSearch() {
@@ -214,11 +310,18 @@ async function handleSearch() {
   // Try local knowledge base first
   let answer = findAnswer(query);
 
+  // Then check approved answers from the review page
   if (!answer) {
-    // Fall back to Wikipedia
-    const wikiAnswer = await fetchFromWikipedia(query);
-    if (wikiAnswer) {
-      answer = wikiAnswer;
+    answer = findApprovedAnswer(query);
+  }
+
+  // Fall back to Wikipedia
+  if (!answer) {
+    const wikiResult = await fetchFromWikipedia(query);
+    if (wikiResult) {
+      answer = rephraseWikipediaText(wikiResult.text, wikiResult.topic);
+      // Save to review queue for approval
+      saveToReviewQueue(query, answer, wikiResult.topic);
     } else {
       answer = "I'm sorry, I couldn't find an answer to that question. Try rephrasing it or asking something else — like a capital city, a science fact, or a historical question!";
     }
