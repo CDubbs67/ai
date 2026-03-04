@@ -47,8 +47,8 @@
                         <circle cx="11" cy="11" r="8" />
                         <path d="m21 21-4.3-4.3" />
                     </svg>
-                    <input type="text" id="search-input" class="search-input"
-                        placeholder="e.g. What is the capital of Florida?" autocomplete="off" autofocus />
+                    <input type="text" id="search-input" class="search-input" placeholder="Say hi or ask a question..."
+                        autocomplete="off" autofocus />
                     <button class="search-btn" id="search-btn" aria-label="Search">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                             <path d="M5 12h14M12 5l7 7-7 7" />
@@ -56,14 +56,13 @@
                     </button>
                 </div>
                 <div class="suggestions" id="suggestions">
-                    <span class="suggestion-label">Try asking:</span>
+                    <span class="suggestion-label">Try saying:</span>
+                    <button class="suggestion-chip" data-query="Hi!">Hi! 👋</button>
+                    <button class="suggestion-chip" data-query="Tell me a joke">Tell me a joke</button>
                     <button class="suggestion-chip" data-query="What is the capital of France?">Capital of
                         France</button>
-                    <button class="suggestion-chip" data-query="Who painted the Mona Lisa?">Who painted the Mona
-                        Lisa?</button>
-                    <button class="suggestion-chip" data-query="What is the largest planet?">Largest planet</button>
-                    <button class="suggestion-chip" data-query="How many bones are in the human body?">Bones in the
-                        human body</button>
+                    <button class="suggestion-chip" data-query="Tell me a fun fact">Fun fact</button>
+                    <button class="suggestion-chip" data-query="What can you do?">What can you do?</button>
                 </div>
             </div>
         </section>
