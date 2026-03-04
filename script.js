@@ -1159,15 +1159,17 @@ async function handleSearch() {
   // Show compact hero
   hero.classList.add('compact');
 
-  // Check for conversational response first (instant, no spinner needed)
-  const chatResponse = findConversationalResponse(query);
-  if (chatResponse) {
-    answerSection.classList.add('visible');
-    answerQuestion.textContent = query;
-    answerBody.innerHTML = `<p class="answer-text">${chatResponse}</p>`;
-    addToHistory(query);
-    answerSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    return;
+  // Check for conversational response first (only in conversation mode)
+  if (currentMode === 'conversation') {
+    const chatResponse = findConversationalResponse(query);
+    if (chatResponse) {
+      answerSection.classList.add('visible');
+      answerQuestion.textContent = query;
+      answerBody.innerHTML = `<p class="answer-text">${chatResponse}</p>`;
+      addToHistory(query);
+      answerSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      return;
+    }
   }
 
   // Show loading state
@@ -1245,6 +1247,59 @@ function renderHistory() {
 }
 
 
+// ===== Mode Toggle =====
+let currentMode = 'conversation'; // 'conversation' or 'research'
+const modeConversationBtn = document.getElementById('mode-conversation');
+const modeResearchBtn = document.getElementById('mode-research');
+const suggestionsContainer = document.getElementById('suggestions');
+
+const conversationSuggestions = [
+  { label: 'Hi! 👋', query: 'Hi!' },
+  { label: 'Tell me a joke', query: 'Tell me a joke' },
+  { label: 'Fun fact', query: 'Tell me a fun fact' },
+  { label: 'Tell me a riddle', query: 'Tell me a riddle' },
+  { label: 'What can you do?', query: 'What can you do?' },
+];
+
+const researchSuggestions = [
+  { label: 'Capital of France', query: 'What is the capital of France?' },
+  { label: 'Largest planet', query: 'What is the largest planet?' },
+  { label: 'Who painted the Mona Lisa?', query: 'Who painted the Mona Lisa?' },
+  { label: 'Speed of light', query: 'What is the speed of light?' },
+  { label: 'Bones in the body', query: 'How many bones are in the human body?' },
+];
+
+function setMode(mode) {
+  currentMode = mode;
+
+  // Update button states
+  modeConversationBtn.classList.toggle('active', mode === 'conversation');
+  modeResearchBtn.classList.toggle('active', mode === 'research');
+
+  // Update placeholder
+  searchInput.placeholder = mode === 'conversation'
+    ? 'Say hi or ask me anything...'
+    : 'Ask a knowledge question...';
+
+  // Update suggestion chips
+  const chips = mode === 'conversation' ? conversationSuggestions : researchSuggestions;
+  const label = mode === 'conversation' ? 'Try saying:' : 'Try asking:';
+  suggestionsContainer.innerHTML = `<span class="suggestion-label">${label}</span>` +
+    chips.map(c => `<button class="suggestion-chip" data-query="${c.query}">${c.label}</button>`).join('');
+
+  // Re-attach click handlers for new chips
+  suggestionsContainer.querySelectorAll('.suggestion-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      searchInput.value = chip.dataset.query;
+      handleSearch();
+    });
+  });
+
+  searchInput.focus();
+}
+
+modeConversationBtn.addEventListener('click', () => setMode('conversation'));
+modeResearchBtn.addEventListener('click', () => setMode('research'));
 
 // ===== Event Listeners =====
 searchBtn.addEventListener('click', handleSearch);
@@ -1258,6 +1313,13 @@ suggestionChips.forEach(chip => {
     searchInput.value = chip.dataset.query;
     handleSearch();
   });
+});
+
+// Clear history button
+document.getElementById('clear-history-btn').addEventListener('click', () => {
+  searchHistory = [];
+  localStorage.removeItem('askNovaHistory');
+  renderHistory();
 });
 
 // Load history on start

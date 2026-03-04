@@ -55,6 +55,14 @@
                         </svg>
                     </button>
                 </div>
+                <div class="mode-toggle" id="mode-toggle">
+                    <button class="mode-btn active" id="mode-conversation" data-mode="conversation">
+                        <span class="mode-icon">💬</span> Conversation
+                    </button>
+                    <button class="mode-btn" id="mode-research" data-mode="research">
+                        <span class="mode-icon">🔍</span> Research
+                    </button>
+                </div>
                 <div class="suggestions" id="suggestions">
                     <span class="suggestion-label">Try saying:</span>
                     <button class="suggestion-chip" data-query="Hi!">Hi! 👋</button>
@@ -82,7 +90,10 @@
         </section>
 
         <section class="history-section" id="history-section">
-            <h3 class="history-title">Recent Questions</h3>
+            <div class="history-header">
+                <h3 class="history-title">Recent Questions</h3>
+                <button class="clear-history-btn" id="clear-history-btn">🗑️ Clear All</button>
+            </div>
             <div class="history-list" id="history-list"></div>
         </section>
     </main>
