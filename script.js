@@ -1324,3 +1324,50 @@ document.getElementById('clear-history-btn').addEventListener('click', () => {
 
 // Load history on start
 renderHistory();
+
+// ===== Theme Picker =====
+const themePickerBtn = document.getElementById('theme-picker-btn');
+const themePanel = document.getElementById('theme-panel');
+const themePanelClose = document.getElementById('theme-panel-close');
+const themeSwatches = document.querySelectorAll('.theme-swatch');
+
+themePickerBtn.addEventListener('click', () => {
+  themePanel.classList.toggle('visible');
+});
+
+themePanelClose.addEventListener('click', () => {
+  themePanel.classList.remove('visible');
+});
+
+// Close panel when clicking outside
+document.addEventListener('click', (e) => {
+  if (!themePanel.contains(e.target) && !themePickerBtn.contains(e.target)) {
+    themePanel.classList.remove('visible');
+  }
+});
+
+function applyTheme(themeName) {
+  // Remove all theme classes
+  document.body.classList.remove('theme-ocean', 'theme-sunset', 'theme-forest', 'theme-midnight', 'theme-rose');
+
+  // Apply new theme (nova is default, no class needed)
+  if (themeName !== 'nova') {
+    document.body.classList.add('theme-' + themeName);
+  }
+
+  // Update active swatch
+  themeSwatches.forEach(s => s.classList.toggle('active', s.dataset.theme === themeName));
+
+  // Save to localStorage
+  localStorage.setItem('askNovaTheme', themeName);
+}
+
+themeSwatches.forEach(swatch => {
+  swatch.addEventListener('click', () => {
+    applyTheme(swatch.dataset.theme);
+  });
+});
+
+// Load saved theme on start
+const savedTheme = localStorage.getItem('askNovaTheme');
+if (savedTheme) applyTheme(savedTheme);

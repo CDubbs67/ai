@@ -35,7 +35,49 @@
                 <a href="review.html"
                     style="font-family:inherit;font-size:0.85rem;font-weight:500;text-decoration:none;padding:8px 18px;border-radius:26px;color:var(--text-muted);transition:var(--transition);">Review</a>
             </nav>
+            <button class="theme-picker-btn" id="theme-picker-btn" aria-label="Change background">
+                🎨
+            </button>
         </header>
+
+        <div class="theme-panel" id="theme-panel">
+            <div class="theme-panel-header">
+                <span class="theme-panel-title">Choose Background</span>
+                <button class="theme-panel-close" id="theme-panel-close">✕</button>
+            </div>
+            <div class="theme-options">
+                <button class="theme-swatch active" data-theme="nova" title="Nova (Default)">
+                    <span class="swatch-colors"
+                        style="background:linear-gradient(135deg,#7c5cfc,#c084fc,#f472b6)"></span>
+                    <span class="swatch-name">Nova</span>
+                </button>
+                <button class="theme-swatch" data-theme="ocean" title="Ocean">
+                    <span class="swatch-colors"
+                        style="background:linear-gradient(135deg,#0ea5e9,#06b6d4,#22d3ee)"></span>
+                    <span class="swatch-name">Ocean</span>
+                </button>
+                <button class="theme-swatch" data-theme="sunset" title="Sunset">
+                    <span class="swatch-colors"
+                        style="background:linear-gradient(135deg,#f97316,#f59e0b,#ef4444)"></span>
+                    <span class="swatch-name">Sunset</span>
+                </button>
+                <button class="theme-swatch" data-theme="forest" title="Forest">
+                    <span class="swatch-colors"
+                        style="background:linear-gradient(135deg,#22c55e,#10b981,#059669)"></span>
+                    <span class="swatch-name">Forest</span>
+                </button>
+                <button class="theme-swatch" data-theme="midnight" title="Midnight">
+                    <span class="swatch-colors"
+                        style="background:linear-gradient(135deg,#6366f1,#8b5cf6,#3b82f6)"></span>
+                    <span class="swatch-name">Midnight</span>
+                </button>
+                <button class="theme-swatch" data-theme="rose" title="Rose">
+                    <span class="swatch-colors"
+                        style="background:linear-gradient(135deg,#f43f5e,#ec4899,#d946ef)"></span>
+                    <span class="swatch-name">Rose</span>
+                </button>
+            </div>
+        </div>
 
         <section class="hero" id="hero">
             <h1 class="hero-title">Ask me <span class="gradient-text">anything</span></h1>
