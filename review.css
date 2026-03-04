@@ -188,6 +188,26 @@
     margin-bottom: 16px;
 }
 
+.review-card-answer textarea {
+    width: 100%;
+    min-height: 120px;
+    background: transparent;
+    border: none;
+    color: inherit;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    resize: vertical;
+    outline: none;
+    padding: 0;
+}
+
+.review-card-answer:focus-within {
+    border-color: var(--accent);
+    background: rgba(124, 92, 252, 0.03);
+    box-shadow: 0 0 0 1px var(--accent);
+}
+
 .review-card-answer .highlight {
     color: var(--accent-light);
     font-weight: 600;
