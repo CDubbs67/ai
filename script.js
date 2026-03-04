@@ -106,8 +106,6 @@ const hero = document.getElementById('hero');
 const answerSection = document.getElementById('answer-section');
 const answerQuestion = document.getElementById('answer-question');
 const answerBody = document.getElementById('answer-body');
-const answerText = document.getElementById('answer-text');
-const askAnotherBtn = document.getElementById('ask-another-btn');
 const historySection = document.getElementById('history-section');
 const historyList = document.getElementById('history-list');
 const suggestionChips = document.querySelectorAll('.suggestion-chip');
@@ -143,8 +141,9 @@ function findAnswer(query) {
       for (const word of kwWords) {
         if (q.includes(word)) matchCount++;
       }
+      // Tighten threshold: 0.85 requires almost all keywords to match
       const score = matchCount / kwWords.length;
-      if (score > bestScore && score >= 0.6) {
+      if (score > bestScore && score >= 0.85) {
         bestScore = score;
         bestMatch = fact;
       }
@@ -371,12 +370,7 @@ function renderHistory() {
   });
 }
 
-function resetView() {
-  hero.classList.remove('compact');
-  answerSection.classList.remove('visible');
-  searchInput.value = '';
-  searchInput.focus();
-}
+
 
 // ===== Event Listeners =====
 searchBtn.addEventListener('click', handleSearch);
@@ -384,8 +378,6 @@ searchBtn.addEventListener('click', handleSearch);
 searchInput.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') handleSearch();
 });
-
-askAnotherBtn.addEventListener('click', resetView);
 
 suggestionChips.forEach(chip => {
   chip.addEventListener('click', () => {
