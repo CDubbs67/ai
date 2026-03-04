@@ -618,6 +618,39 @@ const conversationPatterns = [
       return `${a} − ${b} = <span class='highlight'>${a - b}</span> 🧮`;
     }
   },
+  {
+    triggers: [/what('s| is) (\d+)\s*(\/|divided by)\s*(\d+)/i],
+    responses: ["Let me think... 🧮"],
+    dynamic: true,
+    handler: function (match) {
+      const a = parseInt(match[2]); const b = parseInt(match[4]);
+      if (b === 0) return "I can't divide by zero! That's a math mystery! ❌🧮";
+      const res = a / b;
+      const formatted = res % 1 === 0 ? res : res.toFixed(2);
+      return `${a} ÷ ${b} = <span class='highlight'>${formatted}</span> 🧮`;
+    }
+  },
+  {
+    triggers: [/what('s| is) the square root of (\d+)/i, /sqrt\((\d+)\)/i],
+    responses: ["Let me think... 🧮"],
+    dynamic: true,
+    handler: function (match) {
+      const n = parseInt(match[2] || match[1]);
+      const res = Math.sqrt(n);
+      const formatted = res % 1 === 0 ? res : res.toFixed(3);
+      return `The square root of ${n} is <span class='highlight'>${formatted}</span> 🧮`;
+    }
+  },
+  {
+    triggers: [/what('s| is) (\d+)\s*(to the power of|\^)\s*(\d+)/i],
+    responses: ["Let me think... 🧮"],
+    dynamic: true,
+    handler: function (match) {
+      const a = parseInt(match[2]); const b = parseInt(match[4]);
+      const res = Math.pow(a, b);
+      return `${a} ^ ${b} = <span class='highlight'>${res}</span> 🧮`;
+    }
+  },
   // ===== Advice =====
   {
     triggers: [/give me (some )?advice/i, /i need advice/i, /any advice/i, /words of wisdom/i],
@@ -1325,11 +1358,21 @@ document.getElementById('clear-history-btn').addEventListener('click', () => {
 // Load history on start
 renderHistory();
 
-// ===== Theme Picker =====
+// ===== Theme Picker & Custom Themes =====
 const themePickerBtn = document.getElementById('theme-picker-btn');
 const themePanel = document.getElementById('theme-panel');
 const themePanelClose = document.getElementById('theme-panel-close');
 const themeSwatches = document.querySelectorAll('.theme-swatch');
+
+const addThemeBtn = document.getElementById('add-theme-btn');
+const addThemeForm = document.getElementById('add-theme-form');
+const cancelThemeBtn = document.getElementById('cancel-theme-btn');
+const saveThemeBtn = document.getElementById('save-theme-btn');
+const customThemeColorInput = document.getElementById('custom-theme-color');
+const customThemeNameInput = document.getElementById('custom-theme-name');
+const customThemesList = document.getElementById('custom-themes-list');
+
+let customThemes = JSON.parse(localStorage.getItem('askNovaCustomThemes') || '[]');
 
 themePickerBtn.addEventListener('click', () => {
   themePanel.classList.toggle('visible');
@@ -1337,36 +1380,151 @@ themePickerBtn.addEventListener('click', () => {
 
 themePanelClose.addEventListener('click', () => {
   themePanel.classList.remove('visible');
+  addThemeForm.classList.remove('visible');
 });
 
 // Close panel when clicking outside
 document.addEventListener('click', (e) => {
   if (!themePanel.contains(e.target) && !themePickerBtn.contains(e.target)) {
     themePanel.classList.remove('visible');
+    addThemeForm.classList.remove('visible');
   }
 });
 
-function applyTheme(themeName) {
+addThemeBtn.addEventListener('click', () => {
+  addThemeForm.classList.toggle('visible');
+  if (addThemeForm.classList.contains('visible')) {
+    customThemeNameInput.focus();
+  }
+});
+
+cancelThemeBtn.addEventListener('click', () => {
+  addThemeForm.classList.remove('visible');
+  customThemeNameInput.value = '';
+});
+
+saveThemeBtn.addEventListener('click', () => {
+  const name = customThemeNameInput.value.trim() || 'My Theme';
+  const color = customThemeColorInput.value;
+
+  const newTheme = {
+    id: 'custom-' + Date.now(),
+    name: name,
+    color: color
+  };
+
+  customThemes.push(newTheme);
+  localStorage.setItem('askNovaCustomThemes', JSON.stringify(customThemes));
+
+  renderCustomThemes();
+  applyTheme(newTheme.id);
+
+  addThemeForm.classList.remove('visible');
+  customThemeNameInput.value = '';
+});
+
+function hexToRgb(hex) {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result ? {
+    r: parseInt(result[1], 16),
+    g: parseInt(result[2], 16),
+    b: parseInt(result[3], 16)
+  } : null;
+}
+
+function adjustColor(hex, percent) {
+  const rgb = hexToRgb(hex);
+  if (!rgb) return hex;
+
+  const r = Math.min(255, Math.max(0, rgb.r + (rgb.r * percent)));
+  const g = Math.min(255, Math.max(0, rgb.g + (rgb.g * percent)));
+  const b = Math.min(255, Math.max(0, rgb.b + (rgb.b * percent)));
+
+  const toHex = (n) => {
+    const h = Math.round(n).toString(16);
+    return h.length === 1 ? '0' + h : h;
+  };
+
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+}
+
+function applyTheme(themeId) {
   // Remove all theme classes
   document.body.classList.remove('theme-ocean', 'theme-sunset', 'theme-forest', 'theme-midnight', 'theme-rose');
 
-  // Apply new theme (nova is default, no class needed)
-  if (themeName !== 'nova') {
-    document.body.classList.add('theme-' + themeName);
+  // Clear any previous custom inline styles
+  document.body.style.removeProperty('--accent');
+  document.body.style.removeProperty('--accent-light');
+  document.body.style.removeProperty('--accent-glow');
+  document.body.style.removeProperty('--gradient-1');
+  document.body.style.removeProperty('--gradient-2');
+  document.body.style.removeProperty('--gradient-3');
+
+  if (themeId.startsWith('custom-')) {
+    const theme = customThemes.find(t => t.id === themeId);
+    if (theme) {
+      const base = theme.color;
+      const rgb = hexToRgb(base);
+
+      document.body.style.setProperty('--accent', base);
+      document.body.style.setProperty('--accent-light', adjustColor(base, 0.3));
+      document.body.style.setProperty('--accent-glow', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.3)`);
+      document.body.style.setProperty('--gradient-1', base);
+      document.body.style.setProperty('--gradient-2', adjustColor(base, -0.2));
+      document.body.style.setProperty('--gradient-3', adjustColor(base, 0.4));
+    }
+  } else if (themeId !== 'nova') {
+    document.body.classList.add('theme-' + themeId);
   }
 
-  // Update active swatch
-  themeSwatches.forEach(s => s.classList.toggle('active', s.dataset.theme === themeName));
+  // Update active swatch state
+  document.querySelectorAll('.theme-swatch').forEach(s => {
+    s.classList.toggle('active', s.dataset.theme === themeId);
+  });
 
   // Save to localStorage
-  localStorage.setItem('askNovaTheme', themeName);
+  localStorage.setItem('askNovaTheme', themeId);
 }
 
-themeSwatches.forEach(swatch => {
-  swatch.addEventListener('click', () => {
-    applyTheme(swatch.dataset.theme);
+function renderCustomThemes() {
+  customThemesList.innerHTML = customThemes.map(theme => `
+    <div class="custom-theme-item">
+      <button class="theme-swatch" data-theme="${theme.id}" title="${theme.name}">
+        <span class="swatch-colors" style="background: ${theme.color}"></span>
+        <span class="swatch-name">${theme.name}</span>
+      </button>
+      <button class="delete-theme-btn" data-id="${theme.id}" title="Delete Theme">✕</button>
+    </div>
+  `).join('');
+
+  // Add event listeners to custom swatches
+  customThemesList.querySelectorAll('.theme-swatch').forEach(swatch => {
+    swatch.addEventListener('click', () => applyTheme(swatch.dataset.theme));
   });
+
+  // Add event listeners to delete buttons
+  customThemesList.querySelectorAll('.delete-theme-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const id = btn.dataset.id;
+      customThemes = customThemes.filter(t => t.id !== id);
+      localStorage.setItem('askNovaCustomThemes', JSON.stringify(customThemes));
+
+      // If deleted theme was active, revert to default
+      if (localStorage.getItem('askNovaTheme') === id) {
+        applyTheme('nova');
+      }
+      renderCustomThemes();
+    });
+  });
+}
+
+// Initial setup
+themeSwatches.forEach(swatch => {
+  swatch.addEventListener('click', () => applyTheme(swatch.dataset.theme));
 });
+
+renderCustomThemes();
 
 // Load saved theme on start
 const savedTheme = localStorage.getItem('askNovaTheme');
