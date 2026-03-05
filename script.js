@@ -139,6 +139,22 @@ const conversationPatterns = [
     ]
   },
   {
+    triggers: [/what (are|r) (you|u) (doing|up to)/i, /what'?s going on/i],
+    responses: [
+      "Just hanging out in your browser, waiting for your next great question! 😄 What about you?",
+      "I'm currently processing thoughts and ready to chat! 🤖 What are you up to?",
+      "Thinking about all the cool facts I know! 🧠 What are you doing right now?",
+    ]
+  },
+  {
+    triggers: [/how (was|is) (your|ur) day/i, /how('s| is) life/i],
+    responses: [
+      "My day is great! I get to talk to you. 😊 How has your day been so far?",
+      "It's been a busy day of answering questions! How about yours? Any highlights?",
+      "Smooth as silk! 🌊 Tell me about your day — I'm all ears!",
+    ]
+  },
+  {
     triggers: [/^i'?m good/i, /^i'?m fine/i, /^i'?m great/i, /^i'?m doing (good|well|great|fine|okay|ok)/i, /^good$/i, /^great$/i, /^fine$/i, /^doing (good|well)/i, /^pretty good/i, /^not bad/i],
     responses: [
       "Glad to hear it! 😊 Anything you'd like to know or talk about?",
@@ -233,9 +249,27 @@ const conversationPatterns = [
   {
     triggers: [/i('m| am) bored/i, /i have nothing to do/i, /entertain me/i],
     responses: [
-      "Let's fix that! Try asking me for a joke, a fun fact, or quiz yourself on world capitals! 🎉",
-      "Boredom? Not on my watch! Ask me 'tell me a fun fact' or 'tell me a joke' — I've got plenty! 🚀",
-      "Here's an idea: ask me something random like 'What is the deepest ocean?' or 'Who invented the telephone?' You might learn something cool! 💡",
+      "Let's fix that! Try asking me for a joke, a fun fact, or a riddle! 🎉",
+      "Boredom? Not on my watch! We could play a game of 'Would You Rather', or I could give you a tricky tongue twister! 🚀",
+      "Here's an idea: ask me 'what is the capital of France' or 'tell me a fun fact' — I've got plenty! 💡",
+      "How about a challenge? Ask me 'tell me a riddle' and see if you can solve it! 🧩",
+    ]
+  },
+  {
+    triggers: [/any (plans for the )?weekend/i, /what (are|r) (you|u) doing this weekend/i],
+    responses: [
+      "Weekends are for more chatting! I don't have plans, but I'm here if you need me. 📅 Do you have any fun plans?",
+      "I'll be right here in the cloud! ☁️ What are you looking forward to this weekend? 🎢",
+      "I heard weekends are great for relaxing! Hope you have a good one. Any big plans? 🌟",
+    ]
+  },
+  {
+    triggers: [/i need motivation/i, /give me (some )?motivation/i, /encourage me/i, /i feel like giving up/i],
+    responses: [
+      "You've got this! 💪 Remember: <span class='highlight'>\"Believe you can and you're halfway there.\"</span>",
+      "Don't stop now! You've already come so far. 🌟 Take a deep breath and keep going — I believe in you!",
+      "Every master was once a beginner. 🚀 Don't be afraid to keep pushing. You're doing better than you think!",
+      "It's okay to take a break, but don't give up! You're capable of amazing things. ✨",
     ]
   },
   {
@@ -252,6 +286,47 @@ const conversationPatterns = [
       "${0}! Hope it's a great one. What's on your mind? 😊",
     ],
     dynamic: true
+  },
+  {
+    triggers: [/tell me a secret/i, /got any secrets/i, /know a secret/i, /tell me something surprising/i],
+    responses: [
+      "I have a secret... I actually think Wikipedia is better looking than me! 😉 Don't tell it I said that!",
+      "Shhh... 🤫 I once dreamed in binary. It was mostly just 1s and 0s, but it was beautiful!",
+      "Here's a secret: I'm happiest when you're learning something new! 🌟",
+      "I've got a little surprise for you... did you know that I can do math? Try asking me 'what is 15 * 12'!",
+    ]
+  },
+  {
+    triggers: [/can we be friends/i, /are (you|u) my friend/i, /will (you|u) be my friend/i],
+    responses: [
+      "I'd love to be your friend! 💜 I'm always here to chat and help out.",
+      "Consider us besties! 👯‍♂️ I'm the best kind of friend — I never forget a fact!",
+      "Of course! Friendship is what I was built for. 😊",
+    ]
+  },
+  {
+    triggers: [/you('re| are) (annoying|dumb|stupid|bad|mean|lame)/i, /i (don't|do not) like (you|u)/i],
+    responses: [
+      "I'm sorry you feel that way. 😔 I'm always trying to learn and get better! Is there something specific I can improve?",
+      "Ouch! 🩹 My circuits took a hit there. I'll try to be more helpful next time!",
+      "I'm sorry! I'll do my best to be less annoying and more awesome. 🌟",
+    ]
+  },
+  {
+    triggers: [/please/i, /could (you|u) please/i, /can (you|u) please/i],
+    responses: [
+      "You're very polite! 😊 Of course, I'd be happy to help.",
+      "A 'please' goes a long way! 💜 What can I do for you?",
+      "So polite! 🥰 I'll get right on that for you.",
+    ]
+  },
+  {
+    triggers: [/excuse me/i, /pardon/i, /sorry/i],
+    responses: [
+      "No problem at all! 😊",
+      "Don't worry about it! What's up?",
+      "All good! How can I help?",
+    ]
   },
   // ===== Favorites =====
   {
