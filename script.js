@@ -39,63 +39,76 @@ const knowledgeBase = {
     "saudi arabia": "Riyadh", "pakistan": "Islamabad", "bangladesh": "Dhaka",
     "nepal": "Kathmandu", "sri lanka": "Colombo", "morocco": "Rabat",
     "ethiopia": "Addis Ababa", "ghana": "Accra", "tanzania": "Dodoma",
-    "iceland": "Reykjavik", "luxembourg": "Luxembourg City", "jamaica": "Kingston"
+    "iceland": "Reykjavik", "luxembourg": "Luxembourg City", "jamaica": "Kingston",
+    "thailand": "Bangkok", "vietnam": "Hanoi", "singapore": "Singapore",
+    "ukraine": "Kyiv", "switzerland": "Bern", "new zealand": "Wellington",
+    "egypt": "Cairo", "south africa": "Pretoria", "nigeria": "Abuja",
+    "kenya": "Nairobi", "morocco": "Rabat", "ghana": "Accra",
+    "cuba": "Havana", "peru": "Lima", "chile": "Santiago"
   },
   facts: [
+    // --- Space & Science ---
     { keywords: ["largest planet", "biggest planet"], answer: "The largest planet in our solar system is <span class='highlight'>Jupiter</span>. It has a diameter of about 86,881 miles (139,822 km) and is so massive that all other planets in the solar system could fit inside it." },
     { keywords: ["smallest planet"], answer: "The smallest planet in our solar system is <span class='highlight'>Mercury</span>. It has a diameter of about 3,032 miles (4,879 km), making it only slightly larger than Earth's Moon." },
     { keywords: ["closest planet to the sun", "nearest planet to sun"], answer: "The closest planet to the Sun is <span class='highlight'>Mercury</span>, orbiting at an average distance of about 36 million miles (58 million km)." },
     { keywords: ["how many planets", "number of planets"], answer: "There are <span class='highlight'>8 planets</span> in our solar system: Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, and Neptune. Pluto was reclassified as a dwarf planet in 2006." },
-    { keywords: ["bones in the human body", "how many bones"], answer: "An adult human body has <span class='highlight'>206 bones</span>. Babies are born with about 270 bones, but many of them fuse together as the body grows." },
-    { keywords: ["tallest mountain", "highest mountain", "mount everest height"], answer: "The tallest mountain on Earth is <span class='highlight'>Mount Everest</span>, standing at 29,032 feet (8,849 meters) above sea level. It is located in the Himalayas on the border between Nepal and Tibet." },
-    { keywords: ["longest river", "biggest river"], answer: "The longest river in the world is the <span class='highlight'>Nile River</span> at approximately 4,132 miles (6,650 km). However, some measurements suggest the Amazon River may be longer." },
-    { keywords: ["deepest ocean", "deepest point in the ocean", "mariana trench"], answer: "The deepest point in the ocean is the <span class='highlight'>Mariana Trench</span> in the Pacific Ocean, reaching a depth of about 36,000 feet (about 11,000 meters) at the Challenger Deep." },
+    { keywords: ["what is a black hole"], answer: "A <span class='highlight'>black hole</span> is a region of spacetime where gravity is so strong that nothing, not even light, can escape from it. They are formed when massive stars collapse at the end of their life cycle." },
+    { keywords: ["what is a nebula"], answer: "A <span class='highlight'>nebula</span> is an enormous cloud of dust and gas in outer space. Some nebulas come from the gas and dust thrown out by the explosion of a dying star, while others are regions where new stars are beginning to form." },
+    { keywords: ["mitochondria", "powerhouse of the cell"], answer: "The <span class='highlight'>mitochondria</span> are known as the 'powerhouse of the cell.' They are organelles that act like a digestive system which takes in nutrients, breaks them down, and creates energy rich molecules for the cell." },
     { keywords: ["speed of light"], answer: "The speed of light in a vacuum is approximately <span class='highlight'>186,282 miles per second</span> (299,792 kilometers per second). It takes about 8 minutes and 20 seconds for light from the Sun to reach Earth." },
     { keywords: ["speed of sound"], answer: "The speed of sound in dry air at 20°C (68°F) is approximately <span class='highlight'>343 meters per second</span> (about 767 mph or 1,235 km/h). It varies depending on the medium and temperature." },
-    { keywords: ["painted the mona lisa", "who painted mona lisa", "mona lisa painter", "mona lisa artist"], answer: "The Mona Lisa was painted by <span class='highlight'>Leonardo da Vinci</span>, the Italian Renaissance artist. It was painted between approximately 1503 and 1519 and now hangs in the Louvre Museum in Paris, France." },
-    { keywords: ["largest ocean", "biggest ocean"], answer: "The largest ocean is the <span class='highlight'>Pacific Ocean</span>, covering approximately 63.8 million square miles (165.3 million square km). It's larger than all of Earth's land area combined." },
-    { keywords: ["smallest ocean"], answer: "The smallest ocean is the <span class='highlight'>Arctic Ocean</span>, covering about 5.4 million square miles (14.06 million square km)." },
-    { keywords: ["how many continents", "number of continents"], answer: "There are <span class='highlight'>7 continents</span> on Earth: Africa, Antarctica, Asia, Australia (Oceania), Europe, North America, and South America. Asia is the largest and Australia is the smallest." },
-    { keywords: ["largest country", "biggest country by area"], answer: "The largest country in the world by area is <span class='highlight'>Russia</span>, spanning approximately 6.6 million square miles (17.1 million square km), covering more than one-eighth of Earth's inhabited land area." },
-    { keywords: ["smallest country"], answer: "The smallest country in the world is <span class='highlight'>Vatican City</span>, with an area of only about 0.17 square miles (0.44 sq km). It is entirely surrounded by the city of Rome, Italy." },
-    { keywords: ["most populated country", "most people", "largest population"], answer: "As of recent data, <span class='highlight'>India</span> is the most populated country in the world, having surpassed China with a population exceeding 1.4 billion people." },
-    { keywords: ["who invented the telephone", "telephone inventor"], answer: "The telephone was invented by <span class='highlight'>Alexander Graham Bell</span> in 1876. He was awarded the first U.S. patent for the invention of the telephone." },
-    { keywords: ["who invented the light bulb", "lightbulb inventor", "light bulb inventor"], answer: "The practical incandescent light bulb was developed by <span class='highlight'>Thomas Edison</span> in 1879. While others contributed to the concept, Edison created the first commercially practical version." },
-    { keywords: ["who invented electricity", "discovered electricity"], answer: "<span class='highlight'>Benjamin Franklin</span> is famous for his 1752 kite experiment that demonstrated the electrical nature of lightning. However, many scientists contributed to our understanding of electricity, including Michael Faraday and Nikola Tesla." },
-    { keywords: ["who wrote hamlet", "hamlet author"], answer: "<span class='highlight'>William Shakespeare</span> wrote Hamlet, believed to have been composed between 1599 and 1601. It is one of the most performed plays in the world." },
-    { keywords: ["who wrote romeo and juliet"], answer: "<span class='highlight'>William Shakespeare</span> wrote Romeo and Juliet, believed to have been written between 1591 and 1596. It is one of the most famous love stories ever told." },
     { keywords: ["boiling point of water"], answer: "The boiling point of water is <span class='highlight'>100°C (212°F)</span> at standard atmospheric pressure (1 atm). At higher altitudes, water boils at a lower temperature due to decreased atmospheric pressure." },
     { keywords: ["freezing point of water"], answer: "The freezing point of water is <span class='highlight'>0°C (32°F)</span> at standard atmospheric pressure. Below this temperature, water transitions from a liquid to a solid (ice)." },
     { keywords: ["how many elements", "elements in periodic table"], answer: "There are currently <span class='highlight'>118 confirmed elements</span> in the periodic table. The most recently named elements (in 2016) are Nihonium (113), Moscovium (115), Tennessine (117), and Oganesson (118)." },
     { keywords: ["chemical symbol for water", "formula for water", "h2o"], answer: "The chemical formula for water is <span class='highlight'>H₂O</span>, meaning each molecule of water contains two hydrogen atoms and one oxygen atom bonded together." },
     { keywords: ["chemical symbol for gold", "gold symbol"], answer: "The chemical symbol for gold is <span class='highlight'>Au</span>, derived from the Latin word 'aurum.' Gold has an atomic number of 79." },
-    { keywords: ["how many states", "states in america", "states in the us", "states in usa"], answer: "There are <span class='highlight'>50 states</span> in the United States of America. The most recent states to join were Alaska and Hawaii, both admitted in 1959." },
-    { keywords: ["who was the first president", "first president of the united states", "first us president"], answer: "The first President of the United States was <span class='highlight'>George Washington</span>, who served from 1789 to 1797. He is often referred to as the 'Father of His Country.'" },
-    { keywords: ["who is on the one dollar bill", "dollar bill face"], answer: "<span class='highlight'>George Washington</span>, the first President of the United States, is featured on the one dollar bill." },
-    { keywords: ["who is on the hundred dollar bill", "100 dollar bill"], answer: "<span class='highlight'>Benjamin Franklin</span> is featured on the $100 bill. Interestingly, he was never a President of the United States." },
-    { keywords: ["largest desert", "biggest desert"], answer: "The largest desert in the world is actually <span class='highlight'>Antarctica</span> (a cold desert), covering about 5.5 million square miles. The largest hot desert is the Sahara in Africa, covering about 3.6 million square miles." },
-    { keywords: ["what is pi", "value of pi"], answer: "<span class='highlight'>Pi (π)</span> is a mathematical constant approximately equal to 3.14159. It represents the ratio of a circle's circumference to its diameter and is an irrational number, meaning its decimal representation never ends or repeats." },
     { keywords: ["what is photosynthesis"], answer: "<span class='highlight'>Photosynthesis</span> is the process by which green plants, algae, and some bacteria convert light energy (usually from the Sun) into chemical energy stored in glucose. The basic equation is: 6CO₂ + 6H₂O + light energy → C₆H₁₂O₆ + 6O₂." },
-    { keywords: ["what is gravity"], answer: "<span class='highlight'>Gravity</span> is a fundamental force of nature that attracts objects with mass toward each other. On Earth, it gives weight to physical objects and causes objects to fall toward the ground at approximately 9.8 m/s². It was famously described by Isaac Newton and later refined by Albert Einstein's theory of general relativity." },
-    { keywords: ["what is dna", "what does dna stand for"], answer: "<span class='highlight'>DNA</span> stands for Deoxyribonucleic Acid. It is a molecule that carries the genetic instructions used in the growth, development, functioning, and reproduction of all known living organisms. DNA has a famous double-helix structure, discovered by Watson and Crick in 1953." },
-    { keywords: ["how old is the earth", "age of earth", "earth age"], answer: "The Earth is approximately <span class='highlight'>4.54 billion years old</span>. This age has been determined through radiometric dating of meteorite material and is consistent with the ages of the oldest-known terrestrial and lunar samples." },
-    { keywords: ["how far is the moon", "distance to the moon"], answer: "The average distance from Earth to the Moon is about <span class='highlight'>238,855 miles</span> (384,400 km). This distance varies because the Moon's orbit is slightly elliptical." },
-    { keywords: ["how far is the sun", "distance to the sun"], answer: "The average distance from Earth to the Sun is about <span class='highlight'>93 million miles</span> (150 million km), a distance known as one Astronomical Unit (AU). Light takes about 8 minutes and 20 seconds to travel this distance." },
-    { keywords: ["what is the sun made of", "sun composition"], answer: "The Sun is primarily composed of <span class='highlight'>hydrogen (~73%) and helium (~25%)</span>, with trace amounts of heavier elements like oxygen, carbon, neon, and iron. It generates energy through nuclear fusion, converting hydrogen into helium." },
-    { keywords: ["fastest animal", "fastest land animal"], answer: "The fastest land animal is the <span class='highlight'>cheetah</span>, which can reach speeds of up to 70 mph (112 km/h) in short bursts. The peregrine falcon is the fastest animal overall, reaching speeds over 240 mph (386 km/h) during its hunting dive." },
-    { keywords: ["largest animal", "biggest animal"], answer: "The largest animal ever known to have existed is the <span class='highlight'>blue whale</span>. Blue whales can reach lengths of up to 100 feet (30 meters) and weigh as much as 200 tons (approximately 181 metric tonnes)." },
-    { keywords: ["how many teeth", "teeth do adults have"], answer: "An adult human typically has <span class='highlight'>32 teeth</span>, including 8 incisors, 4 canines, 8 premolars, and 12 molars (which include 4 wisdom teeth)." },
-    { keywords: ["how many chromosomes", "human chromosomes"], answer: "Humans typically have <span class='highlight'>46 chromosomes</span> (23 pairs) in each cell. One pair determines biological sex (XX for female, XY for male)." },
-    { keywords: ["what year did world war 2 end", "when did ww2 end", "world war 2 end"], answer: "World War II ended in <span class='highlight'>1945</span>. Germany surrendered on May 8, 1945 (V-E Day), and Japan surrendered on August 15, 1945 (V-J Day), following the atomic bombings of Hiroshima and Nagasaki." },
-    { keywords: ["what year did world war 1 end", "when did ww1 end", "world war 1 end"], answer: "World War I ended on <span class='highlight'>November 11, 1918</span>, when an armistice was signed between the Allied Powers and Germany. The Treaty of Versailles was later signed on June 28, 1919." },
-    { keywords: ["who discovered america", "who found america"], answer: "<span class='highlight'>Christopher Columbus</span> is traditionally credited with discovering America in 1492, though Norse explorer Leif Erikson reached North America around 1000 AD, and Indigenous peoples had been living there for thousands of years before that." },
-    { keywords: ["who invented the internet"], answer: "The internet was developed through the work of many scientists and engineers. Key contributors include <span class='highlight'>Vint Cerf and Bob Kahn</span>, who developed TCP/IP protocols in the 1970s. Tim Berners-Lee invented the World Wide Web in 1989." },
-    { keywords: ["what is the great wall of china", "how long is the great wall"], answer: "The <span class='highlight'>Great Wall of China</span> is a series of fortifications built over many centuries to protect Chinese states against invasions. Its total length, including all branches, is approximately 13,171 miles (21,196 km)." },
-    { keywords: ["hardest substance", "hardest material", "hardest natural"], answer: "The hardest naturally occurring substance on Earth is <span class='highlight'>diamond</span>, rating 10 on the Mohs hardness scale. It is made of carbon atoms arranged in a crystal structure." },
-    { keywords: ["who invented the airplane", "who invented flight", "first airplane"], answer: "The <span class='highlight'>Wright Brothers</span> — Orville and Wilbur Wright — are credited with inventing and building the first successful motor-operated airplane. Their first controlled flight took place on December 17, 1903, at Kitty Hawk, North Carolina." },
-    { keywords: ["hottest planet"], answer: "The hottest planet in our solar system is <span class='highlight'>Venus</span>, with surface temperatures reaching about 900°F (475°C). Despite Mercury being closer to the Sun, Venus is hotter due to its thick atmosphere creating a strong greenhouse effect." },
-    { keywords: ["coldest planet"], answer: "The coldest planet in our solar system is <span class='highlight'>Neptune</span>, with temperatures dropping to about -373°F (-225°C). Uranus occasionally reaches similar cold temperatures." },
-    { keywords: ["biggest star", "largest star"], answer: "One of the largest known stars is <span class='highlight'>UY Scuti</span>, a red supergiant with a radius about 1,700 times that of our Sun. If placed at the center of our solar system, its surface would extend beyond the orbit of Jupiter." },
+    { keywords: ["what is gravity"], answer: "<span class='highlight'>Gravity</span> is a fundamental force of nature that attracts objects with mass toward each other. On Earth, it gives weight to physical objects and causes objects to fall toward the ground at approximately 9.8 m/s²." },
+    { keywords: ["what is dna", "what does dna stand for"], answer: "<span class='highlight'>DNA</span> stands for Deoxyribonucleic Acid. It is a molecule that carries the genetic instructions used in the growth, development, functioning, and reproduction of all known living organisms." },
+    { keywords: ["how old is the earth", "age of earth", "earth age"], answer: "The Earth is approximately <span class='highlight'>4.54 billion years old</span>. This age has been determined through radiometric dating of meteorite material." },
+
+    // --- History & Landmarks ---
+    { keywords: ["tallest mountain", "highest mountain"], answer: "The tallest mountain on Earth is <span class='highlight'>Mount Everest</span>, standing at 29,032 feet (8,849 meters) above sea level. It is located in the Himalayas." },
+    { keywords: ["longest river"], answer: "The longest river in the world is the <span class='highlight'>Nile River</span> at approximately 4,132 miles (6,650 km). However, some measurements suggest the Amazon River may be longer." },
+    { keywords: ["deepest ocean", "mariana trench"], answer: "The deepest point in the ocean is the <span class='highlight'>Mariana Trench</span> in the Pacific Ocean, reaching a depth of about 36,000 feet (about 11,000 meters)." },
+    { keywords: ["who painted the mona lisa", "who painted mona lisa"], answer: "The Mona Lisa was painted by <span class='highlight'>Leonardo da Vinci</span> between approximately 1503 and 1519. It now hangs in the Louvre Museum in Paris." },
+    { keywords: ["who was the first president", "first us president"], answer: "The first President of the United States was <span class='highlight'>George Washington</span>, who served from 1789 to 1797." },
+    { keywords: ["what year did world war 2 end"], answer: "World War II ended in <span class='highlight'>1945</span>. Germany surrendered in May, and Japan surrendered in August." },
+    { keywords: ["what year did world war 1 end"], answer: "World War I ended on <span class='highlight'>November 11, 1918</span>, with the signing of an armistice between the Allies and Germany." },
+    { keywords: ["who discovered america"], answer: "<span class='highlight'>Christopher Columbus</span> is traditionally credited with reaching America in 1492, though Norse explorer Leif Erikson arrived around 1000 AD." },
+    { keywords: ["who was albert einstein"], answer: "<span class='highlight'>Albert Einstein</span> was a theoretical physicist who developed the theory of relativity. His famous equation is E=mc², showing the relationship between mass and energy." },
+    { keywords: ["what is the colosseum"], answer: "The <span class='highlight'>Colosseum</span> is an ancient amphitheater in Rome, Italy. Completed in 80 AD, it was used for gladiatorial contests and public spectacles." },
+    { keywords: ["what are the pyramids of giza"], answer: "The <span class='highlight'>Pyramids of Giza</span> are ancient pyramid-shaped structures in Egypt. The Great Pyramid is the oldest of the Seven Wonders of the Ancient World." },
+
+    // --- Technology & Coding ---
+    { keywords: ["what is javascript", "what is js"], answer: "<span class='highlight'>JavaScript</span> is a programming language that allows you to create interactive web content. It's one of the core technologies of the World Wide Web, alongside HTML and CSS." },
+    { keywords: ["what is python"], answer: "<span class='highlight'>Python</span> is a high-level, general-purpose programming language known for its readability. It's widely used in data science, AI, web development, and automation." },
+    { keywords: ["what is html"], answer: "<span class='highlight'>HTML</span> (HyperText Markup Language) is the standard markup language for creating web pages. it describes the structure of a page semantically." },
+    { keywords: ["what is css"], answer: "<span class='highlight'>CSS</span> (Cascading Style Sheets) is a style sheet language used for describing the presentation of a document written in HTML. It controls the layout, colors, and fonts." },
+    { keywords: ["who is ada lovelace"], answer: "<span class='highlight'>Ada Lovelace</span> was an English mathematician and writer, often regarded as the first computer programmer for her work on Charles Babbage's early mechanical general-purpose computer." },
+    { keywords: ["what is an api"], answer: "An <span class='highlight'>API</span> (Application Programming Interface) is a set of rules that allows different software applications to communicate with each other. It defines the kinds of requests that can be made and how to make them." },
+    { keywords: ["what is binary"], answer: "<span class='highlight'>Binary</span> is a base-2 numeral system that uses only two symbols: 0 and 1. It is the fundamental language of computers, representing data such as text, images, and video." },
+    { keywords: ["who invented the internet"], answer: "The internet was developed by many, but <span class='highlight'>Vint Cerf and Bob Kahn</span> developed the TCP/IP protocols. Tim Berners-Lee invented the World Wide Web in 1989." },
+    { keywords: ["what is ai", "what is artificial intelligence"], answer: "<span class='highlight'>Artificial Intelligence</span> (AI) is the simulation of human intelligence processes by machines, especially computer systems. These processes include learning, reasoning, and self-correction." },
+    { keywords: ["what is a variable in coding"], answer: "In programming, a <span class='highlight'>variable</span> is a value that can change, depending on conditions or on information passed to the program. It acts as a storage container for data." },
+    { keywords: ["what is a loop in coding"], answer: "A <span class='highlight'>loop</span> is a sequence of instructions that is continually repeated until a certain condition is reached. Common types include 'for' and 'while' loops." },
+
+    // --- Arts, Geography & Math ---
+    { keywords: ["who painted starry night"], answer: "<span class='highlight'>Vincent van Gogh</span> painted 'The Starry Night' in 1889. It depicts the view from his asylum room at Saint-Rémy-de-Provence." },
+    { keywords: ["what is the value of pi"], answer: "<span class='highlight'>Pi (π)</span> is a mathematical constant approximately equal to 3.14159. It represents the ratio of a circle's circumference to its diameter." },
+    { keywords: ["what is the pythagorean theorem"], answer: "The <span class='highlight'>Pythagorean theorem</span> states that in a right-angled triangle, the square of the hypotenuse (the side opposite the right angle) is equal to the sum of the squares of the other two sides: a² + b² = c²." },
+    { keywords: ["what is the largest desert", "biggest desert"], answer: "The largest desert in the world is <span class='highlight'>Antarctica</span> (a cold desert). The largest hot desert is the Sahara in Africa." },
+    { keywords: ["what is the amazon rainforest"], answer: "The <span class='highlight'>Amazon Rainforest</span> is the largest tropical rainforest in the world, covering much of northwestern Brazil and extending into Colombia and Peru. It is often called the 'Lungs of the Planet.'" },
+    { keywords: ["who wrote 1984"], answer: "<span class='highlight'>George Orwell</span> wrote the dystopian novel '1984,' published in 1949. It popularized concepts like Big Brother and Thought Police." },
+    { keywords: ["what is surrealism"], answer: "<span class='highlight'>Surrealism</span> was a 20th-century avant-garde movement in art and literature which sought to release the creative potential of the unconscious mind, often by the irrational juxtaposition of images." },
+    { keywords: ["how many keys on a piano"], answer: "A standard modern piano has <span class='highlight'>88 keys</span> — 52 white keys and 36 black keys." },
+    { keywords: ["what is eulers number", "what is the value of e"], answer: "<span class='highlight'>Euler's number (e)</span> is a mathematical constant approximately equal to 2.71828. It is the base of the natural logarithm and is vital in calculus and financial modeling." },
+    { keywords: ["what is the golden ratio", "what is phi"], answer: "The <span class='highlight'>golden ratio (φ)</span> is a mathematical constant approximately equal to 1.618. It is often found in nature, art, and architecture, representing a proportion that is aesthetically pleasing." },
+    { keywords: ["newton's first law", "law of inertia"], answer: "<span class='highlight'>Newton's First Law of Motion</span> (Law of Inertia) states that an object at rest stays at rest, and an object in motion stays in motion with the same speed and in the same direction unless acted upon by an unbalanced force." },
+    { keywords: ["what are chromosomes"], answer: "<span class='highlight'>Chromosomes</span> are thread-like structures located inside the nucleus of animal and plant cells. Each chromosome is made of protein and a single molecule of deoxyribonucleic acid (DNA)." },
+    { keywords: ["what is cells division", "what is mitosis"], answer: "<span class='highlight'>Mitosis</span> is a process of cell duplication, or reproduction, during which one cell gives rise to two genetically identical daughter cells." },
+    { keywords: ["what is linux"], answer: "<span class='highlight'>Linux</span> is a family of open-source Unix-like operating systems based on the Linux kernel. It is widely used for servers, mainframes, and as the basis for the Android operating system." },
+    { keywords: ["what is a database"], answer: "A <span class='highlight'>database</span> is an organized collection of structured information, or data, typically stored electronically in a computer system. Databases are usually controlled by a Database Management System (DBMS)." },
   ]
 };
 
@@ -1356,10 +1369,12 @@ function renderHistory() {
 
 
 // ===== Mode Toggle =====
-let currentMode = 'conversation'; // 'conversation' or 'research'
+let currentMode = 'conversation'; // 'conversation', 'research', or 'coding'
 const modeConversationBtn = document.getElementById('mode-conversation');
 const modeResearchBtn = document.getElementById('mode-research');
+const modeCodingBtn = document.getElementById('mode-coding');
 const suggestionsContainer = document.getElementById('suggestions');
+const codingSection = document.getElementById('coding-section');
 
 const conversationSuggestions = [
   { label: 'Hi! 👋', query: 'Hi!' },
@@ -1377,12 +1392,35 @@ const researchSuggestions = [
   { label: 'Bones in the body', query: 'How many bones are in the human body?' },
 ];
 
+const codingSuggestions = [
+  { label: 'Hello World', code: "console.log('Hello, World!');" },
+  { label: 'For Loop', code: "for (let i = 1; i <= 5; i++) {\n  console.log('Number: ' + i);\n}" },
+  { label: 'Array Methods', code: "const fruits = ['apple', 'banana', 'cherry'];\nfruits.forEach(fruit => console.log(fruit));" },
+  { label: 'Math Example', code: "const a = 10;\nconst b = 3;\nconsole.log('Sum:', a + b);\nconsole.log('Product:', a * b);\nconsole.log('Power:', Math.pow(a, b));" },
+  { label: 'Object Demo', code: "const person = {\n  name: 'Nova',\n  age: 1,\n  greet() {\n    return `Hi, I'm ${this.name}!`;\n  }\n};\nconsole.log(person.greet());" },
+];
+
 function setMode(mode) {
   currentMode = mode;
 
   // Update button states
   modeConversationBtn.classList.toggle('active', mode === 'conversation');
   modeResearchBtn.classList.toggle('active', mode === 'research');
+  modeCodingBtn.classList.toggle('active', mode === 'coding');
+
+  if (mode === 'coding') {
+    // Hide search-related UI, show code editor
+    document.getElementById('search-container').style.display = 'none';
+    answerSection.classList.remove('visible');
+    historySection.style.display = 'none';
+    codingSection.classList.add('visible');
+    return;
+  }
+
+  // Not coding mode — restore search UI
+  document.getElementById('search-container').style.display = '';
+  historySection.style.display = '';
+  codingSection.classList.remove('visible');
 
   // Update placeholder
   searchInput.placeholder = mode === 'conversation'
@@ -1408,6 +1446,332 @@ function setMode(mode) {
 
 modeConversationBtn.addEventListener('click', () => setMode('conversation'));
 modeResearchBtn.addEventListener('click', () => setMode('research'));
+modeCodingBtn.addEventListener('click', () => setMode('coding'));
+
+// ===== Code Execution =====
+const codeInput = document.getElementById('code-input');
+const codeOutput = document.getElementById('code-output');
+const runCodeBtn = document.getElementById('run-code-btn');
+const clearCodeBtn = document.getElementById('clear-code-btn');
+
+function runCode() {
+  const code = codeInput.value.trim();
+  if (!code) {
+    codeOutput.innerHTML = '<span class="code-output-placeholder">Write some code first!</span>';
+    return;
+  }
+
+  // Capture console.log output
+  const logs = [];
+  const originalLog = console.log;
+  const originalWarn = console.warn;
+  const originalError = console.error;
+
+  console.log = (...args) => {
+    logs.push({ type: 'log', text: args.map(a => typeof a === 'object' ? JSON.stringify(a, null, 2) : String(a)).join(' ') });
+  };
+  console.warn = (...args) => {
+    logs.push({ type: 'warn', text: args.map(a => typeof a === 'object' ? JSON.stringify(a, null, 2) : String(a)).join(' ') });
+  };
+  console.error = (...args) => {
+    logs.push({ type: 'error', text: args.map(a => typeof a === 'object' ? JSON.stringify(a, null, 2) : String(a)).join(' ') });
+  };
+
+  try {
+    const result = new Function(code)();
+    // Restore console
+    console.log = originalLog;
+    console.warn = originalWarn;
+    console.error = originalError;
+
+    let outputHtml = '';
+    logs.forEach(log => {
+      const cls = log.type === 'error' ? 'error-line' : 'log-line';
+      outputHtml += `<div class="${cls}">${escapeHtml(log.text)}</div>`;
+    });
+
+    if (result !== undefined) {
+      outputHtml += `<div class="result-line">→ ${escapeHtml(String(result))}</div>`;
+    }
+
+    if (!outputHtml) {
+      outputHtml = '<span class="code-output-placeholder">Code executed successfully (no output).</span>';
+    }
+
+    codeOutput.innerHTML = outputHtml;
+  } catch (err) {
+    // Restore console
+    console.log = originalLog;
+    console.warn = originalWarn;
+    console.error = originalError;
+
+    let outputHtml = '';
+    logs.forEach(log => {
+      const cls = log.type === 'error' ? 'error-line' : 'log-line';
+      outputHtml += `<div class="${cls}">${escapeHtml(log.text)}</div>`;
+    });
+    outputHtml += `<div class="error-line">❌ Error: ${escapeHtml(err.message)}</div>`;
+    codeOutput.innerHTML = outputHtml;
+  }
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function clearCode() {
+  codeInput.value = '';
+  codeOutput.innerHTML = '<span class="code-output-placeholder">Click "Run" to see your code output here...</span>';
+  codeInput.focus();
+}
+
+// Tab key support in the code editor
+codeInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    const start = codeInput.selectionStart;
+    const end = codeInput.selectionEnd;
+    codeInput.value = codeInput.value.substring(0, start) + '  ' + codeInput.value.substring(end);
+    codeInput.selectionStart = codeInput.selectionEnd = start + 2;
+  }
+  // Ctrl+Enter / Cmd+Enter to run
+  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+    e.preventDefault();
+    runCode();
+  }
+});
+
+runCodeBtn.addEventListener('click', runCode);
+clearCodeBtn.addEventListener('click', clearCode);
+
+// ===== Code Chat Assistant =====
+const codeChatMessages = document.getElementById('code-chat-messages');
+const codeChatInput = document.getElementById('code-chat-input');
+const codeChatSend = document.getElementById('code-chat-send');
+
+const codeTemplates = [
+  {
+    triggers: [/hello\s*world/i, /print\s*hello/i, /say\s*hello/i],
+    description: "Here's a simple Hello World program:",
+    code: `console.log("Hello, World!");`
+  },
+  {
+    triggers: [/add\s*(two|2)?\s*numbers/i, /sum\s*(two|2)?\s*numbers/i, /addition\s*function/i],
+    description: "Here's a function that adds two numbers:",
+    code: `function add(a, b) {\n  return a + b;\n}\n\nconsole.log(add(5, 3));  // 8\nconsole.log(add(10, 20)); // 30`
+  },
+  {
+    triggers: [/subtract/i, /minus/i, /subtraction/i],
+    description: "Here's a subtraction function:",
+    code: `function subtract(a, b) {\n  return a - b;\n}\n\nconsole.log(subtract(10, 3)); // 7`
+  },
+  {
+    triggers: [/multiply/i, /multiplication/i, /times/i],
+    description: "Here's a multiplication function:",
+    code: `function multiply(a, b) {\n  return a * b;\n}\n\nconsole.log(multiply(4, 7)); // 28`
+  },
+  {
+    triggers: [/divide/i, /division/i],
+    description: "Here's a division function with error handling:",
+    code: `function divide(a, b) {\n  if (b === 0) return "Cannot divide by zero!";\n  return a / b;\n}\n\nconsole.log(divide(20, 4)); // 5\nconsole.log(divide(10, 0)); // Error message`
+  },
+  {
+    triggers: [/calculator/i],
+    description: "Here's a simple calculator with all basic operations:",
+    code: `function calculator(a, op, b) {\n  switch(op) {\n    case '+': return a + b;\n    case '-': return a - b;\n    case '*': return a * b;\n    case '/': return b !== 0 ? a / b : 'Error: Division by zero';\n    default: return 'Unknown operator';\n  }\n}\n\nconsole.log(calculator(10, '+', 5));  // 15\nconsole.log(calculator(10, '*', 3));  // 30\nconsole.log(calculator(10, '/', 2));  // 5`
+  },
+  {
+    triggers: [/for\s*loop/i, /loop.*numbers/i, /count\s*(to|from)/i],
+    description: "Here's a for loop that counts numbers:",
+    code: `for (let i = 1; i <= 10; i++) {\n  console.log("Number: " + i);\n}`
+  },
+  {
+    triggers: [/while\s*loop/i],
+    description: "Here's a while loop example:",
+    code: `let count = 0;\nwhile (count < 5) {\n  console.log("Count is: " + count);\n  count++;\n}`
+  },
+  {
+    triggers: [/array/i, /list\s*(of|with)/i],
+    description: "Here's how to work with arrays:",
+    code: `const fruits = ["apple", "banana", "cherry", "mango"];\n\n// Loop through\nfruits.forEach(fruit => console.log(fruit));\n\n// Add item\nfruits.push("grape");\nconsole.log("After push:", fruits);\n\n// Filter\nconst longNames = fruits.filter(f => f.length > 5);\nconsole.log("Long names:", longNames);`
+  },
+  {
+    triggers: [/object/i, /person/i, /profile/i],
+    description: "Here's an example using objects:",
+    code: `const person = {\n  name: "Nova",\n  age: 1,\n  skills: ["JavaScript", "HTML", "CSS"],\n  greet() {\n    return "Hi! I'm " + this.name + " and I know " + this.skills.join(", ");\n  }\n};\n\nconsole.log(person.greet());\nconsole.log("Age:", person.age);`
+  },
+  {
+    triggers: [/random\s*number/i, /generate.*random/i, /dice/i],
+    description: "Here's a random number generator:",
+    code: `function randomBetween(min, max) {\n  return Math.floor(Math.random() * (max - min + 1)) + min;\n}\n\nconsole.log("Random 1-100:", randomBetween(1, 100));\nconsole.log("Dice roll:", randomBetween(1, 6));`
+  },
+  {
+    triggers: [/countdown/i, /timer/i, /count\s*down/i],
+    description: "Here's a countdown timer:",
+    code: `function countdown(seconds) {\n  for (let i = seconds; i >= 0; i--) {\n    if (i === 0) {\n      console.log("🚀 Go!");\n    } else {\n      console.log(i + "...");\n    }\n  }\n}\n\ncountdown(5);`
+  },
+  {
+    triggers: [/fizz\s*buzz/i],
+    description: "Here's the classic FizzBuzz challenge:",
+    code: `for (let i = 1; i <= 30; i++) {\n  if (i % 15 === 0) console.log("FizzBuzz");\n  else if (i % 3 === 0) console.log("Fizz");\n  else if (i % 5 === 0) console.log("Buzz");\n  else console.log(i);\n}`
+  },
+  {
+    triggers: [/reverse.*string/i, /string.*reverse/i, /flip.*text/i],
+    description: "Here's a function to reverse a string:",
+    code: `function reverseString(str) {\n  return str.split("").reverse().join("");\n}\n\nconsole.log(reverseString("hello"));     // "olleh"\nconsole.log(reverseString("JavaScript")); // "tpircSavaJ"`
+  },
+  {
+    triggers: [/palindrome/i],
+    description: "Here's a palindrome checker:",
+    code: `function isPalindrome(str) {\n  const cleaned = str.toLowerCase().replace(/[^a-z0-9]/g, "");\n  return cleaned === cleaned.split("").reverse().join("");\n}\n\nconsole.log(isPalindrome("racecar")); // true\nconsole.log(isPalindrome("hello"));   // false\nconsole.log(isPalindrome("A man a plan a canal Panama")); // true`
+  },
+  {
+    triggers: [/factorial/i],
+    description: "Here's a factorial function:",
+    code: `function factorial(n) {\n  if (n <= 1) return 1;\n  return n * factorial(n - 1);\n}\n\nconsole.log(factorial(5));  // 120\nconsole.log(factorial(10)); // 3628800`
+  },
+  {
+    triggers: [/fibonacci/i],
+    description: "Here's a Fibonacci sequence generator:",
+    code: `function fibonacci(n) {\n  const seq = [0, 1];\n  for (let i = 2; i < n; i++) {\n    seq.push(seq[i-1] + seq[i-2]);\n  }\n  return seq;\n}\n\nconsole.log(fibonacci(10));\n// [0, 1, 1, 2, 3, 5, 8, 13, 21, 34]`
+  },
+  {
+    triggers: [/sort/i, /order/i, /arrange/i],
+    description: "Here's how to sort an array:",
+    code: `const numbers = [42, 8, 15, 23, 4, 16];\n\n// Sort ascending\nconst ascending = [...numbers].sort((a, b) => a - b);\nconsole.log("Ascending:", ascending);\n\n// Sort descending\nconst descending = [...numbers].sort((a, b) => b - a);\nconsole.log("Descending:", descending);`
+  },
+  {
+    triggers: [/temperature|celsius|fahrenheit|convert.*temp/i],
+    description: "Here's a temperature converter:",
+    code: `function celsiusToFahrenheit(c) {\n  return (c * 9/5) + 32;\n}\n\nfunction fahrenheitToCelsius(f) {\n  return (f - 32) * 5/9;\n}\n\nconsole.log("100°C =", celsiusToFahrenheit(100) + "°F");\nconsole.log("72°F =", fahrenheitToCelsius(72).toFixed(1) + "°C");`
+  },
+  {
+    triggers: [/class/i, /animal/i, /dog|cat/i],
+    description: "Here's a class-based example with animals:",
+    code: `class Animal {\n  constructor(name, sound) {\n    this.name = name;\n    this.sound = sound;\n  }\n  speak() {\n    return this.name + " says " + this.sound + "!";\n  }\n}\n\nconst dog = new Animal("Dog", "Woof");\nconst cat = new Animal("Cat", "Meow");\n\nconsole.log(dog.speak());\nconsole.log(cat.speak());`
+  },
+  {
+    triggers: [/guess.*number|number.*guess|guessing\s*game/i],
+    description: "Here's a number guessing game logic:",
+    code: `function playGuessingGame() {\n  const secret = Math.floor(Math.random() * 10) + 1;\n  const guesses = [3, 7, 5]; // Simulated guesses\n  \n  console.log("Secret number is between 1-10");\n  for (const guess of guesses) {\n    if (guess === secret) {\n      console.log("Guess " + guess + ": 🎉 Correct!");\n      return;\n    } else if (guess < secret) {\n      console.log("Guess " + guess + ": Too low!");\n    } else {\n      console.log("Guess " + guess + ": Too high!");\n    }\n  }\n  console.log("The answer was: " + secret);\n}\n\nplayGuessingGame();`
+  },
+  {
+    triggers: [/to.?do|task\s*list|checklist/i],
+    description: "Here's a to-do list manager:",
+    code: `const todoList = [];\n\nfunction addTask(task) {\n  todoList.push({ task, done: false });\n  console.log('Added: "' + task + '"');\n}\n\nfunction completeTask(index) {\n  todoList[index].done = true;\n  console.log('Completed: "' + todoList[index].task + '"');\n}\n\nfunction showTasks() {\n  todoList.forEach((t, i) => {\n    const status = t.done ? "✅" : "⬜";\n    console.log(status + " " + i + ": " + t.task);\n  });\n}\n\naddTask("Learn JavaScript");\naddTask("Build a project");\naddTask("Take a break");\ncompleteTask(0);\nshowTasks();`
+  },
+];
+
+function findCodeTemplate(prompt) {
+  const p = prompt.toLowerCase();
+  for (const template of codeTemplates) {
+    for (const trigger of template.triggers) {
+      if (trigger.test(p)) return template;
+    }
+  }
+  return null;
+}
+
+function addChatMessage(text, isUser) {
+  const msgDiv = document.createElement('div');
+  msgDiv.className = `chat-msg ${isUser ? 'user-msg' : 'bot-msg'}`;
+  msgDiv.innerHTML = `
+    <div class="chat-avatar">${isUser ? '👤' : '🤖'}</div>
+    <div class="chat-bubble">${text}</div>
+  `;
+  codeChatMessages.appendChild(msgDiv);
+  codeChatMessages.scrollTop = codeChatMessages.scrollHeight;
+}
+
+function addTypingIndicator() {
+  const typing = document.createElement('div');
+  typing.className = 'chat-msg bot-msg';
+  typing.id = 'typing-indicator';
+  typing.innerHTML = `
+    <div class="chat-avatar">🤖</div>
+    <div class="chat-bubble">
+      <div class="typing-dots"><span></span><span></span><span></span></div>
+    </div>
+  `;
+  codeChatMessages.appendChild(typing);
+  codeChatMessages.scrollTop = codeChatMessages.scrollHeight;
+}
+
+function removeTypingIndicator() {
+  const indicator = document.getElementById('typing-indicator');
+  if (indicator) indicator.remove();
+}
+
+function addBotCodeResponse(description, code) {
+  const msgDiv = document.createElement('div');
+  msgDiv.className = 'chat-msg bot-msg';
+  const codeId = 'gen-code-' + Date.now();
+  msgDiv.innerHTML = `
+    <div class="chat-avatar">🤖</div>
+    <div class="chat-bubble">
+      ${description}
+      <div class="chat-code-block" id="${codeId}">${escapeHtml(code)}</div>
+      <button class="chat-insert-btn" onclick="insertCodeFromChat('${codeId}')">📥 Insert into Editor</button>
+    </div>
+  `;
+  codeChatMessages.appendChild(msgDiv);
+  codeChatMessages.scrollTop = codeChatMessages.scrollHeight;
+}
+
+function insertCodeFromChat(codeId) {
+  const block = document.getElementById(codeId);
+  if (block) {
+    codeInput.value = block.textContent;
+    codeInput.focus();
+    // Flash the editor to draw attention
+    codeInput.style.borderColor = '#22c55e';
+    setTimeout(() => { codeInput.style.borderColor = ''; }, 1000);
+  }
+}
+
+// Make insertCodeFromChat globally accessible
+window.insertCodeFromChat = insertCodeFromChat;
+
+function handleChatSend() {
+  const prompt = codeChatInput.value.trim();
+  if (!prompt) return;
+
+  // Add user message
+  addChatMessage(prompt, true);
+  codeChatInput.value = '';
+
+  // Show typing indicator
+  addTypingIndicator();
+
+  // Simulate thinking delay
+  setTimeout(() => {
+    removeTypingIndicator();
+
+    const template = findCodeTemplate(prompt);
+    if (template) {
+      addBotCodeResponse(template.description, template.code);
+    } else {
+      addChatMessage(
+        "I'm not sure how to code that yet! Try asking me to:<br><br>" +
+        "• Make a function (add, multiply, etc.)<br>" +
+        "• Create a loop or countdown<br>" +
+        "• Build an array or object<br>" +
+        "• Write a calculator<br>" +
+        "• Generate a fibonacci sequence<br>" +
+        "• Make a to-do list<br>" +
+        "• Write a guessing game",
+        false
+      );
+    }
+  }, 800);
+}
+
+codeChatSend.addEventListener('click', handleChatSend);
+codeChatInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') handleChatSend();
+});
 
 // ===== Event Listeners =====
 searchBtn.addEventListener('click', handleSearch);
