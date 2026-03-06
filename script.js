@@ -1875,6 +1875,24 @@ function handleChatSend() {
   setTimeout(() => {
     removeTypingIndicator();
 
+    const p = prompt.toLowerCase();
+    if (p === 'help' || p === 'list' || p === 'templates') {
+      addChatMessage(
+        "👋 <b>Available Coding Templates:</b><br><br>" +
+        "I can generate code for over 140 topics! Try asking for:<br>" +
+        "• <b>Math:</b> calculator, fibonacci, roman numerals, unit converters<br>" +
+        "• <b>Strings:</b> cipher, anagram, snake_case, word count<br>" +
+        "• <b>Data:</b> linked list, stack, bst, map/set, json parse<br>" +
+        "• <b>Games:</b> tic tac toe, hangman, rock paper scissors, dice<br>" +
+        "• <b>Logic:</b> fizzbuzz, bubblesort, binary search, prime numbers<br>" +
+        "• <b>Modern JS:</b> async/await, closures, proxies, generators<br>" +
+        "• <b>Apps:</b> to-do list, expense tracker, shopping cart<br><br>" +
+        "Just type a keyword to get started!",
+        false
+      );
+      return;
+    }
+
     const template = findCodeTemplate(prompt);
     if (template) {
       addBotCodeResponse(template.description, template.code);
