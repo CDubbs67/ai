@@ -1662,7 +1662,133 @@ const codeTemplates = [
     description: "Here's a to-do list manager:",
     code: `const todoList = [];\n\nfunction addTask(task) {\n  todoList.push({ task, done: false });\n  console.log('Added: "' + task + '"');\n}\n\nfunction completeTask(index) {\n  todoList[index].done = true;\n  console.log('Completed: "' + todoList[index].task + '"');\n}\n\nfunction showTasks() {\n  todoList.forEach((t, i) => {\n    const status = t.done ? "✅" : "⬜";\n    console.log(status + " " + i + ": " + t.task);\n  });\n}\n\naddTask("Learn JavaScript");\naddTask("Build a project");\naddTask("Take a break");\ncompleteTask(0);\nshowTasks();`
   },
+  // --- Advanced JS Concepts ---
+  {
+    triggers: [/promise/i, /async.*await/i, /asynchronous/i],
+    description: "Here's how promises and async/await work:",
+    code: `// Using a Promise\nfunction fetchData() {\n  return new Promise((resolve) => {\n    setTimeout(() => {\n      resolve("Data loaded!");\n    }, 1000);\n  });\n}\n\n// Using async/await\nasync function main() {\n  console.log("Loading...");\n  const data = await fetchData();\n  console.log(data);\n}\n\n// Since we can't truly await here, let's demo with .then()\nfetchData().then(result => console.log(result));`
+  },
+  {
+    triggers: [/map\s*(data|structure|collection)/i, /hash\s*map/i, /new\s*map/i],
+    description: "Here's how to use a Map in JavaScript:",
+    code: `const userMap = new Map();\n\n// Add entries\nuserMap.set("alice", { age: 25, role: "admin" });\nuserMap.set("bob", { age: 30, role: "user" });\nuserMap.set("charlie", { age: 28, role: "user" });\n\n// Access\nconsole.log("Alice:", userMap.get("alice"));\nconsole.log("Has bob?", userMap.has("bob"));\nconsole.log("Size:", userMap.size);\n\n// Iterate\nuserMap.forEach((value, key) => {\n  console.log(key + " -> " + value.role);\n});`
+  },
+  {
+    triggers: [/set\s*(data|structure|collection)/i, /unique.*values/i, /new\s*set/i],
+    description: "Here's how to use a Set for unique values:",
+    code: `const numbers = [1, 2, 3, 2, 4, 3, 5, 1];\nconst uniqueNumbers = new Set(numbers);\n\nconsole.log("Original:", numbers);\nconsole.log("Unique:", [...uniqueNumbers]);\nconsole.log("Size:", uniqueNumbers.size);\n\n// Add and check\nuniqueNumbers.add(6);\nconsole.log("Has 3?", uniqueNumbers.has(3));\nconsole.log("Has 7?", uniqueNumbers.has(7));`
+  },
+  {
+    triggers: [/regex/i, /regular\s*expression/i, /pattern\s*match/i, /validate.*email/i],
+    description: "Here's how to use regular expressions:",
+    code: `// Email validation\nfunction isValidEmail(email) {\n  const pattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$/;\n  return pattern.test(email);\n}\n\nconsole.log(isValidEmail("user@example.com"));  // true\nconsole.log(isValidEmail("not-an-email"));       // false\n\n// Extract numbers from text\nconst text = "I have 3 cats and 2 dogs";\nconst nums = text.match(/\\d+/g);\nconsole.log("Numbers found:", nums);`
+  },
+  {
+    triggers: [/closure/i],
+    description: "Here's an example of closures in JavaScript:",
+    code: `function createCounter() {\n  let count = 0; // Private variable\n  return {\n    increment() { return ++count; },\n    decrement() { return --count; },\n    getCount() { return count; }\n  };\n}\n\nconst counter = createCounter();\nconsole.log(counter.increment()); // 1\nconsole.log(counter.increment()); // 2\nconsole.log(counter.decrement()); // 1\nconsole.log(counter.getCount());  // 1`
+  },
+  {
+    triggers: [/destructur/i, /unpack/i],
+    description: "Here's destructuring in JavaScript:",
+    code: `// Array destructuring\nconst [first, second, ...rest] = [1, 2, 3, 4, 5];\nconsole.log("First:", first);     // 1\nconsole.log("Second:", second);   // 2\nconsole.log("Rest:", rest);       // [3, 4, 5]\n\n// Object destructuring\nconst { name, age, role = "user" } = { name: "Nova", age: 1 };\nconsole.log(name);  // "Nova"\nconsole.log(age);   // 1\nconsole.log(role);  // "user" (default value)`
+  },
+  {
+    triggers: [/spread/i, /rest\s*operator/i, /three\s*dots/i, /\.\.\./],
+    description: "Here's the spread operator in action:",
+    code: `// Combining arrays\nconst arr1 = [1, 2, 3];\nconst arr2 = [4, 5, 6];\nconst combined = [...arr1, ...arr2];\nconsole.log("Combined:", combined);\n\n// Cloning objects\nconst original = { name: "Nova", level: 1 };\nconst clone = { ...original, level: 2 };\nconsole.log("Original:", original);\nconsole.log("Clone:", clone);`
+  },
+  {
+    triggers: [/ternary/i, /conditional.*express/i, /shorthand.*if/i],
+    description: "Here's the ternary operator (shorthand if/else):",
+    code: `const age = 18;\nconst status = age >= 18 ? "Adult" : "Minor";\nconsole.log(status); // "Adult"\n\n// Nested ternary\nconst score = 85;\nconst grade = score >= 90 ? "A" : score >= 80 ? "B" : score >= 70 ? "C" : "F";\nconsole.log("Grade:", grade); // "B"`
+  },
+  {
+    triggers: [/arrow\s*function/i, /fat\s*arrow/i, /=>/],
+    description: "Here's arrow function syntax:",
+    code: `// Traditional function\nfunction greet(name) {\n  return "Hello, " + name;\n}\n\n// Arrow function\nconst greetArrow = (name) => "Hello, " + name;\n\n// Arrow with multiple lines\nconst calculate = (a, b) => {\n  const sum = a + b;\n  const product = a * b;\n  return { sum, product };\n};\n\nconsole.log(greetArrow("Nova"));\nconsole.log(calculate(3, 4));`
+  },
+  {
+    triggers: [/date|time|clock|today/i],
+    description: "Here's how to work with dates and times:",
+    code: `const now = new Date();\n\nconsole.log("Full date:", now.toString());\nconsole.log("Date:", now.toLocaleDateString());\nconsole.log("Time:", now.toLocaleTimeString());\nconsole.log("Year:", now.getFullYear());\nconsole.log("Month:", now.getMonth() + 1); // 0-indexed\nconsole.log("Day:", now.getDate());\nconsole.log("Day of week:", ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][now.getDay()]);`
+  },
+  {
+    triggers: [/json/i, /parse.*json/i, /stringify/i],
+    description: "Here's how to work with JSON:",
+    code: `const user = {\n  name: "Nova",\n  skills: ["JavaScript", "HTML"],\n  active: true\n};\n\n// Object to JSON string\nconst jsonString = JSON.stringify(user, null, 2);\nconsole.log("JSON string:\\n" + jsonString);\n\n// JSON string back to object\nconst parsed = JSON.parse(jsonString);\nconsole.log("\\nParsed name:", parsed.name);\nconsole.log("Skills:", parsed.skills);`
+  },
+  {
+    triggers: [/string\s*method/i, /text\s*manipulat/i, /upper.*case|lower.*case/i],
+    description: "Here are useful string methods:",
+    code: `const str = "  Hello, JavaScript World!  ";\n\nconsole.log("Trim:", str.trim());\nconsole.log("Upper:", str.trim().toUpperCase());\nconsole.log("Lower:", str.trim().toLowerCase());\nconsole.log("Includes:", str.includes("Java"));\nconsole.log("Replace:", str.trim().replace("World", "Nova"));\nconsole.log("Split:", "a,b,c,d".split(","));\nconsole.log("Repeat:", "Ha".repeat(3));\nconsole.log("StartsWith:", "Hello".startsWith("He"));\nconsole.log("Slice:", "JavaScript".slice(0, 4));`
+  },
+  {
+    triggers: [/try.*catch|error\s*handl|exception/i],
+    description: "Here's try/catch error handling:",
+    code: `function safeDivide(a, b) {\n  try {\n    if (b === 0) throw new Error("Cannot divide by zero!");\n    return a / b;\n  } catch (error) {\n    console.log("Error caught:", error.message);\n    return null;\n  } finally {\n    console.log("Operation complete.");\n  }\n}\n\nconsole.log("10 / 2 =", safeDivide(10, 2));\nconsole.log("5 / 0 =", safeDivide(5, 0));`
+  },
+  {
+    triggers: [/switch.*statement|switch.*case/i, /menu/i],
+    description: "Here's a switch statement example:",
+    code: `function getDayMessage(day) {\n  switch(day.toLowerCase()) {\n    case "monday":    return "😤 Start of the week!";\n    case "tuesday":   return "📚 Keep going!";\n    case "wednesday": return "🐫 Hump day!";\n    case "thursday":  return "📈 Almost there!";\n    case "friday":    return "🎉 TGIF!";\n    case "saturday":  return "🎮 Weekend vibes!";\n    case "sunday":    return "😴 Rest day!";\n    default:          return "🤔 Not a valid day.";\n  }\n}\n\n["Monday", "Friday", "Sunday"].forEach(day => {\n  console.log(day + ": " + getDayMessage(day));\n});`
+  },
+  {
+    triggers: [/rock.*paper.*scissors/i, /rps/i],
+    description: "Here's a Rock Paper Scissors game:",
+    code: `function rockPaperScissors(player) {\n  const choices = ["rock", "paper", "scissors"];\n  const computer = choices[Math.floor(Math.random() * 3)];\n  console.log("You: " + player + " | Computer: " + computer);\n\n  if (player === computer) return console.log("🤝 It's a tie!");\n  \n  const wins = { rock: "scissors", paper: "rock", scissors: "paper" };\n  if (wins[player] === computer) {\n    console.log("🎉 You win!");\n  } else {\n    console.log("😢 Computer wins!");\n  }\n}\n\nrockPaperScissors("rock");\nrockPaperScissors("paper");\nrockPaperScissors("scissors");`
+  },
+  {
+    triggers: [/shopping.*cart|cart/i, /store|shop/i],
+    description: "Here's a shopping cart system:",
+    code: `const cart = [];\n\nfunction addItem(name, price, qty = 1) {\n  cart.push({ name, price, qty });\n  console.log("Added: " + name + " x" + qty);\n}\n\nfunction getTotal() {\n  return cart.reduce((sum, item) => sum + item.price * item.qty, 0);\n}\n\nfunction showCart() {\n  console.log("\\n🛒 Shopping Cart:");\n  cart.forEach(item => {\n    console.log("  " + item.name + " x" + item.qty + " = $" + (item.price * item.qty).toFixed(2));\n  });\n  console.log("  Total: $" + getTotal().toFixed(2));\n}\n\naddItem("Apple", 1.50, 3);\naddItem("Bread", 2.99);\naddItem("Milk", 3.49, 2);\nshowCart();`
+  },
+  {
+    triggers: [/password.*generat/i, /random.*password/i, /generate.*password/i],
+    description: "Here's a password generator:",
+    code: `function generatePassword(length = 12) {\n  const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";\n  let password = "";\n  for (let i = 0; i < length; i++) {\n    password += chars[Math.floor(Math.random() * chars.length)];\n  }\n  return password;\n}\n\nconsole.log("8-char:", generatePassword(8));\nconsole.log("12-char:", generatePassword(12));\nconsole.log("16-char:", generatePassword(16));`
+  },
+  {
+    triggers: [/quiz|trivia|question.*answer/i],
+    description: "Here's a quiz game engine:",
+    code: `const questions = [\n  { q: "What does JS stand for?", a: "javascript" },\n  { q: "How many bits in a byte?", a: "8" },\n  { q: "What year was JS created?", a: "1995" }\n];\n\nfunction runQuiz() {\n  let score = 0;\n  const answers = ["javascript", "8", "1995"]; // Simulated answers\n  \n  questions.forEach((question, i) => {\n    console.log("Q" + (i+1) + ": " + question.q);\n    const userAnswer = answers[i];\n    if (userAnswer.toLowerCase() === question.a) {\n      console.log("✅ Correct!");\n      score++;\n    } else {\n      console.log("❌ Wrong! Answer: " + question.a);\n    }\n  });\n  console.log("\\nScore: " + score + "/" + questions.length);\n}\n\nrunQuiz();`
+  },
+  {
+    triggers: [/bmi|body.*mass/i, /weight.*height/i, /health.*calc/i],
+    description: "Here's a BMI calculator:",
+    code: `function calculateBMI(weight, height) {\n  // weight in kg, height in meters\n  const bmi = weight / (height * height);\n  let category;\n  if (bmi < 18.5) category = "Underweight";\n  else if (bmi < 25) category = "Normal";\n  else if (bmi < 30) category = "Overweight";\n  else category = "Obese";\n  \n  return { bmi: bmi.toFixed(1), category };\n}\n\nconst result = calculateBMI(70, 1.75);\nconsole.log("BMI:", result.bmi);\nconsole.log("Category:", result.category);`
+  },
+  {
+    triggers: [/tip.*calc/i, /split.*bill/i, /restaurant|waiter/i],
+    description: "Here's a tip calculator:",
+    code: `function calculateTip(bill, tipPercent, people = 1) {\n  const tip = bill * (tipPercent / 100);\n  const total = bill + tip;\n  const perPerson = total / people;\n  \n  console.log("Bill: $" + bill.toFixed(2));\n  console.log("Tip (" + tipPercent + "%): $" + tip.toFixed(2));\n  console.log("Total: $" + total.toFixed(2));\n  if (people > 1) {\n    console.log("Per person (" + people + "): $" + perPerson.toFixed(2));\n  }\n}\n\nconsole.log("--- Dinner bill ---");\ncalculateTip(85.50, 18, 4);`
+  },
+  {
+    triggers: [/color.*random|random.*color|hex.*color/i],
+    description: "Here's a random color generator:",
+    code: `function randomHexColor() {\n  return "#" + Math.floor(Math.random() * 16777215).toString(16).padStart(6, "0");\n}\n\nfunction randomRGB() {\n  const r = Math.floor(Math.random() * 256);\n  const g = Math.floor(Math.random() * 256);\n  const b = Math.floor(Math.random() * 256);\n  return "rgb(" + r + ", " + g + ", " + b + ")";\n}\n\nfor (let i = 0; i < 5; i++) {\n  console.log("Hex:", randomHexColor(), "| RGB:", randomRGB());\n}`
+  },
+  {
+    triggers: [/prime.*number|is.*prime|find.*prime/i],
+    description: "Here's a prime number checker and finder:",
+    code: `function isPrime(n) {\n  if (n < 2) return false;\n  for (let i = 2; i <= Math.sqrt(n); i++) {\n    if (n % i === 0) return false;\n  }\n  return true;\n}\n\n// Check specific numbers\n[2, 7, 10, 13, 25, 29].forEach(n => {\n  console.log(n + ": " + (isPrime(n) ? "Prime ✅" : "Not prime"));\n});\n\n// Find first 10 primes\nconst primes = [];\nlet num = 2;\nwhile (primes.length < 10) {\n  if (isPrime(num)) primes.push(num);\n  num++;\n}\nconsole.log("\\nFirst 10 primes:", primes);`
+  },
+  {
+    triggers: [/map.*filter.*reduce|higher.*order|functional/i],
+    description: "Here's map, filter, and reduce in action:",
+    code: `const students = [\n  { name: "Alice", grade: 92 },\n  { name: "Bob", grade: 78 },\n  { name: "Charlie", grade: 95 },\n  { name: "Diana", grade: 88 },\n  { name: "Eve", grade: 64 }\n];\n\n// Map: get names\nconst names = students.map(s => s.name);\nconsole.log("Names:", names);\n\n// Filter: passing students (grade >= 70)\nconst passing = students.filter(s => s.grade >= 70);\nconsole.log("Passing:", passing.map(s => s.name));\n\n// Reduce: average grade\nconst avg = students.reduce((sum, s) => sum + s.grade, 0) / students.length;\nconsole.log("Average:", avg.toFixed(1));`
+  },
+  {
+    triggers: [/stack|push.*pop|lifo/i],
+    description: "Here's a stack data structure (LIFO):",
+    code: `class Stack {\n  constructor() {\n    this.items = [];\n  }\n  push(item) {\n    this.items.push(item);\n    console.log("Pushed:", item);\n  }\n  pop() {\n    const item = this.items.pop();\n    console.log("Popped:", item);\n    return item;\n  }\n  peek() { return this.items[this.items.length - 1]; }\n  size() { return this.items.length; }\n}\n\nconst stack = new Stack();\nstack.push("A");\nstack.push("B");\nstack.push("C");\nconsole.log("Top:", stack.peek());\nstack.pop();\nconsole.log("After pop, top:", stack.peek());`
+  },
 ];
+
+// Merge extra templates from code-templates.js
+if (typeof extraCodeTemplates !== 'undefined') {
+  codeTemplates.push(...extraCodeTemplates);
+}
 
 function findCodeTemplate(prompt) {
   const p = prompt.toLowerCase();
@@ -1754,14 +1880,14 @@ function handleChatSend() {
       addBotCodeResponse(template.description, template.code);
     } else {
       addChatMessage(
-        "I'm not sure how to code that yet! Try asking me to:<br><br>" +
-        "• Make a function (add, multiply, etc.)<br>" +
-        "• Create a loop or countdown<br>" +
-        "• Build an array or object<br>" +
-        "• Write a calculator<br>" +
-        "• Generate a fibonacci sequence<br>" +
-        "• Make a to-do list<br>" +
-        "• Write a guessing game",
+        "I'm not sure how to code that yet! Here are some things I can help with:<br><br>" +
+        "📐 <b>Math:</b> calculator, fibonacci, factorial, prime numbers<br>" +
+        "🎮 <b>Games:</b> guessing game, rock paper scissors, quiz<br>" +
+        "📦 <b>Data:</b> arrays, objects, Map, Set, JSON, stack<br>" +
+        "🔧 <b>Functions:</b> closures, arrow functions, async/await<br>" +
+        "🛒 <b>Apps:</b> to-do list, shopping cart, tip calculator, BMI<br>" +
+        "🔑 <b>Tools:</b> password generator, random colors, regex<br>" +
+        "📝 <b>Concepts:</b> loops, destructuring, spread, try/catch",
         false
       );
     }
