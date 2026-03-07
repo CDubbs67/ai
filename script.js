@@ -2881,14 +2881,16 @@ function handleArtSend() {
 
     if (/^(help|list|templates)$/i.test(prompt)) {
       addArtChatMessage(
-        "🎨 <b>I can draw these for you:</b><br><br>" +
-        "🌅 <b>Nature:</b> sunset, mountains, ocean, forest, rainbow, tree, aurora, moon<br>" +
-        "✨ <b>Space:</b> stars, galaxy, night sky, fireworks<br>" +
-        "😊 <b>Faces:</b> smiley face, robot, cat, emoji<br>" +
-        "🏙️ <b>Scenes:</b> city skyline, house<br>" +
-        "🎨 <b>Patterns:</b> gradient, checkerboard, polka dots, stripes, spiral, mandala<br>" +
-        "💎 <b>Objects:</b> heart, flower, snowflake, diamond, circles<br><br>" +
-        "Just type what you want to see!",
+        "🎨 <b>Everything I can draw:</b><br><br>" +
+        "🌅 <b>Nature:</b> sunset, mountains, ocean, forest, rainbow, tree, aurora, moon, waterfall, volcano<br>" +
+        "✨ <b>Space:</b> stars, galaxy, night sky, fireworks, planet, rocket<br>" +
+        "😊 <b>Faces & Animals:</b> smiley face, robot, cat, dog, bird, butterfly, fish, emoji<br>" +
+        "🏙️ <b>Scenes:</b> city skyline, house, car, umbrella<br>" +
+        "🍕 <b>Food:</b> pizza, cake, ice cream<br>" +
+        "🌧️ <b>Weather:</b> clouds, lightning storm, snowflake<br>" +
+        "🎨 <b>Patterns:</b> gradient, checkerboard, polka dots, stripes, spiral, mandala, waves, zigzag, concentric circles, pixel art<br>" +
+        "💎 <b>Objects:</b> heart, flower, diamond, crown, circles<br><br>" +
+        "Just type what you want to see! You can also <b>edit</b> any image using the toolbar above the canvas. ✏️",
         false
       );
       return;
@@ -2930,4 +2932,744 @@ clearArtBtn.addEventListener('click', () => {
   artCtx.clearRect(0, 0, artCanvas.width, artCanvas.height);
   artCanvas.classList.remove('active');
   artPlaceholder.classList.remove('hidden');
+  undoStack = [];
 });
+
+// ===== Art Editing Tools =====
+let currentTool = 'draw';
+let isDrawing = false;
+let lastX = 0, lastY = 0;
+let undoStack = [];
+const MAX_UNDO = 20;
+
+const artColorInput = document.getElementById('art-color');
+const artBrushSize = document.getElementById('art-brush-size');
+const toolButtons = {
+  draw: document.getElementById('tool-draw'),
+  eraser: document.getElementById('tool-eraser'),
+  circle: document.getElementById('tool-circle'),
+  rect: document.getElementById('tool-rect'),
+  text: document.getElementById('tool-text'),
+};
+const undoBtn = document.getElementById('tool-undo');
+
+function saveUndoState() {
+  undoStack.push(artCtx.getImageData(0, 0, artCanvas.width, artCanvas.height));
+  if (undoStack.length > MAX_UNDO) undoStack.shift();
+}
+
+function selectTool(tool) {
+  currentTool = tool;
+  Object.values(toolButtons).forEach(btn => btn.classList.remove('active'));
+  if (toolButtons[tool]) toolButtons[tool].classList.add('active');
+  artCanvas.className = artCanvas.className.replace(/drawing|erasing/g, '').trim();
+  if (tool === 'draw') artCanvas.classList.add('drawing', 'active');
+  else if (tool === 'eraser') artCanvas.classList.add('erasing', 'active');
+  else artCanvas.classList.add('drawing', 'active');
+}
+
+Object.keys(toolButtons).forEach(tool => {
+  toolButtons[tool].addEventListener('click', () => selectTool(tool));
+});
+
+undoBtn.addEventListener('click', () => {
+  if (undoStack.length > 0) {
+    const state = undoStack.pop();
+    artCtx.putImageData(state, 0, 0);
+  }
+});
+
+function getCanvasPos(e) {
+  const rect = artCanvas.getBoundingClientRect();
+  const scaleX = artCanvas.width / rect.width;
+  const scaleY = artCanvas.height / rect.height;
+  return {
+    x: (e.clientX - rect.left) * scaleX,
+    y: (e.clientY - rect.top) * scaleY
+  };
+}
+
+artCanvas.addEventListener('mousedown', (e) => {
+  if (!artCanvas.classList.contains('active')) return;
+  isDrawing = true;
+  const pos = getCanvasPos(e);
+  lastX = pos.x;
+  lastY = pos.y;
+
+  if (currentTool === 'circle' || currentTool === 'rect' || currentTool === 'text') {
+    saveUndoState();
+    const size = parseInt(artBrushSize.value);
+    const color = artColorInput.value;
+
+    if (currentTool === 'circle') {
+      artCtx.beginPath();
+      artCtx.arc(pos.x, pos.y, size * 3, 0, Math.PI * 2);
+      artCtx.fillStyle = color;
+      artCtx.fill();
+    } else if (currentTool === 'rect') {
+      artCtx.fillStyle = color;
+      const s = size * 5;
+      artCtx.fillRect(pos.x - s / 2, pos.y - s / 2, s, s);
+    } else if (currentTool === 'text') {
+      const text = prompt('Enter text to stamp:');
+      if (text) {
+        artCtx.font = `${size * 3}px Inter, sans-serif`;
+        artCtx.fillStyle = color;
+        artCtx.textAlign = 'center';
+        artCtx.textBaseline = 'middle';
+        artCtx.fillText(text, pos.x, pos.y);
+      }
+    }
+    isDrawing = false;
+    return;
+  }
+
+  saveUndoState();
+});
+
+artCanvas.addEventListener('mousemove', (e) => {
+  if (!isDrawing) return;
+  const pos = getCanvasPos(e);
+  const size = parseInt(artBrushSize.value);
+
+  if (currentTool === 'draw') {
+    artCtx.beginPath();
+    artCtx.moveTo(lastX, lastY);
+    artCtx.lineTo(pos.x, pos.y);
+    artCtx.strokeStyle = artColorInput.value;
+    artCtx.lineWidth = size;
+    artCtx.lineCap = 'round';
+    artCtx.lineJoin = 'round';
+    artCtx.stroke();
+  } else if (currentTool === 'eraser') {
+    artCtx.beginPath();
+    artCtx.moveTo(lastX, lastY);
+    artCtx.lineTo(pos.x, pos.y);
+    artCtx.strokeStyle = '#0d0d14';
+    artCtx.lineWidth = size * 3;
+    artCtx.lineCap = 'round';
+    artCtx.lineJoin = 'round';
+    artCtx.stroke();
+  }
+
+  lastX = pos.x;
+  lastY = pos.y;
+});
+
+artCanvas.addEventListener('mouseup', () => { isDrawing = false; });
+artCanvas.addEventListener('mouseleave', () => { isDrawing = false; });
+
+// Touch support
+artCanvas.addEventListener('touchstart', (e) => {
+  e.preventDefault();
+  const touch = e.touches[0];
+  const mouseEvent = new MouseEvent('mousedown', { clientX: touch.clientX, clientY: touch.clientY });
+  artCanvas.dispatchEvent(mouseEvent);
+});
+artCanvas.addEventListener('touchmove', (e) => {
+  e.preventDefault();
+  const touch = e.touches[0];
+  const mouseEvent = new MouseEvent('mousemove', { clientX: touch.clientX, clientY: touch.clientY });
+  artCanvas.dispatchEvent(mouseEvent);
+});
+artCanvas.addEventListener('touchend', () => {
+  artCanvas.dispatchEvent(new MouseEvent('mouseup'));
+});
+
+// ===== More Art Templates =====
+const extraArtTemplates = [
+  {
+    triggers: [/dog|puppy/i],
+    description: "Here's a cute dog! 🐶",
+    draw(ctx, w, h) {
+      ctx.fillStyle = '#fff8e1'; ctx.fillRect(0, 0, w, h);
+      const cx = w / 2, cy = h / 2;
+      // Body
+      ctx.beginPath(); ctx.ellipse(cx, cy + 80, 100, 70, 0, 0, Math.PI * 2);
+      ctx.fillStyle = '#8d6e63'; ctx.fill();
+      // Head
+      ctx.beginPath(); ctx.arc(cx, cy - 20, 75, 0, Math.PI * 2);
+      ctx.fillStyle = '#a1887f'; ctx.fill();
+      // Ears
+      ctx.fillStyle = '#6d4c41';
+      ctx.beginPath(); ctx.ellipse(cx - 65, cy - 60, 25, 45, -0.3, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(cx + 65, cy - 60, 25, 45, 0.3, 0, Math.PI * 2); ctx.fill();
+      // Eyes
+      ctx.fillStyle = '#333';
+      ctx.beginPath(); ctx.arc(cx - 25, cy - 30, 12, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(cx + 25, cy - 30, 12, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.beginPath(); ctx.arc(cx - 21, cy - 34, 4, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(cx + 29, cy - 34, 4, 0, Math.PI * 2); ctx.fill();
+      // Nose
+      ctx.fillStyle = '#333';
+      ctx.beginPath(); ctx.ellipse(cx, cy + 5, 15, 10, 0, 0, Math.PI * 2); ctx.fill();
+      // Tongue
+      ctx.fillStyle = '#ef5350';
+      ctx.beginPath(); ctx.ellipse(cx, cy + 30, 12, 20, 0, 0, Math.PI * 2); ctx.fill();
+      // Tail
+      ctx.strokeStyle = '#8d6e63'; ctx.lineWidth = 8; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.arc(cx + 100, cy + 60, 40, -0.5, 1.5); ctx.stroke();
+    }
+  },
+  {
+    triggers: [/bird/i],
+    description: "Here's a bird! 🐦",
+    draw(ctx, w, h) {
+      ctx.fillStyle = '#e3f2fd'; ctx.fillRect(0, 0, w, h);
+      const cx = w / 2, cy = h / 2;
+      // Body
+      ctx.beginPath(); ctx.ellipse(cx, cy, 60, 45, -0.2, 0, Math.PI * 2);
+      ctx.fillStyle = '#42a5f5'; ctx.fill();
+      // Head
+      ctx.beginPath(); ctx.arc(cx + 50, cy - 30, 30, 0, Math.PI * 2);
+      ctx.fillStyle = '#42a5f5'; ctx.fill();
+      // Wing
+      ctx.beginPath(); ctx.ellipse(cx - 20, cy - 10, 50, 25, -0.5, 0, Math.PI * 2);
+      ctx.fillStyle = '#1e88e5'; ctx.fill();
+      // Eye
+      ctx.fillStyle = '#fff';
+      ctx.beginPath(); ctx.arc(cx + 58, cy - 35, 8, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#333';
+      ctx.beginPath(); ctx.arc(cx + 60, cy - 35, 4, 0, Math.PI * 2); ctx.fill();
+      // Beak
+      ctx.fillStyle = '#ff9800';
+      ctx.beginPath(); ctx.moveTo(cx + 78, cy - 30); ctx.lineTo(cx + 100, cy - 25); ctx.lineTo(cx + 78, cy - 20); ctx.closePath(); ctx.fill();
+      // Legs
+      ctx.strokeStyle = '#ff9800'; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(cx - 10, cy + 40); ctx.lineTo(cx - 15, cy + 70); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(cx + 10, cy + 40); ctx.lineTo(cx + 5, cy + 70); ctx.stroke();
+      // Tail
+      ctx.fillStyle = '#1565c0';
+      ctx.beginPath(); ctx.moveTo(cx - 55, cy); ctx.lineTo(cx - 100, cy - 20); ctx.lineTo(cx - 90, cy + 10); ctx.closePath(); ctx.fill();
+    }
+  },
+  {
+    triggers: [/butterfly/i],
+    description: "Here's a butterfly! 🦋",
+    draw(ctx, w, h) {
+      ctx.fillStyle = '#fce4ec'; ctx.fillRect(0, 0, w, h);
+      const cx = w / 2, cy = h / 2;
+      const wingColors = [['#e040fb', '#ab47bc'], ['#7c4dff', '#651fff'], ['#ff4081', '#f50057'], ['#40c4ff', '#0091ea']];
+      const pick = wingColors[Math.floor(Math.random() * wingColors.length)];
+      // Wings
+      ctx.fillStyle = pick[0];
+      ctx.beginPath(); ctx.ellipse(cx - 60, cy - 30, 55, 70, -0.3, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(cx + 60, cy - 30, 55, 70, 0.3, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = pick[1];
+      ctx.beginPath(); ctx.ellipse(cx - 50, cy + 40, 35, 50, -0.2, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(cx + 50, cy + 40, 35, 50, 0.2, 0, Math.PI * 2); ctx.fill();
+      // Wing patterns
+      ctx.fillStyle = 'rgba(255,255,255,0.3)';
+      ctx.beginPath(); ctx.arc(cx - 60, cy - 30, 20, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(cx + 60, cy - 30, 20, 0, Math.PI * 2); ctx.fill();
+      // Body
+      ctx.fillStyle = '#333';
+      ctx.beginPath(); ctx.ellipse(cx, cy, 8, 60, 0, 0, Math.PI * 2); ctx.fill();
+      // Antennae
+      ctx.strokeStyle = '#333'; ctx.lineWidth = 2; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(cx - 3, cy - 55); ctx.quadraticCurveTo(cx - 30, cy - 100, cx - 40, cy - 90); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(cx + 3, cy - 55); ctx.quadraticCurveTo(cx + 30, cy - 100, cx + 40, cy - 90); ctx.stroke();
+      ctx.fillStyle = '#333';
+      ctx.beginPath(); ctx.arc(cx - 40, cy - 90, 4, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(cx + 40, cy - 90, 4, 0, Math.PI * 2); ctx.fill();
+    }
+  },
+  {
+    triggers: [/fish|aquarium/i],
+    description: "Here's a fish! 🐟",
+    draw(ctx, w, h) {
+      const bg = ctx.createLinearGradient(0, 0, 0, h);
+      bg.addColorStop(0, '#0277bd'); bg.addColorStop(1, '#01579b');
+      ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
+      // Bubbles
+      for (let i = 0; i < 15; i++) {
+        ctx.beginPath(); ctx.arc(Math.random() * w, Math.random() * h, 5 + Math.random() * 15, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(255,255,255,${0.1 + Math.random() * 0.2})`; ctx.lineWidth = 1.5; ctx.stroke();
+      }
+      const cx = w / 2, cy = h / 2;
+      // Body
+      ctx.beginPath(); ctx.ellipse(cx, cy, 90, 55, 0, 0, Math.PI * 2);
+      const fishGrad = ctx.createLinearGradient(cx - 90, cy, cx + 90, cy);
+      fishGrad.addColorStop(0, '#ff7043'); fishGrad.addColorStop(1, '#ff5722');
+      ctx.fillStyle = fishGrad; ctx.fill();
+      // Tail
+      ctx.fillStyle = '#e64a19';
+      ctx.beginPath(); ctx.moveTo(cx + 80, cy); ctx.lineTo(cx + 140, cy - 40); ctx.lineTo(cx + 140, cy + 40); ctx.closePath(); ctx.fill();
+      // Eye
+      ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(cx - 40, cy - 10, 16, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#333'; ctx.beginPath(); ctx.arc(cx - 38, cy - 10, 8, 0, Math.PI * 2); ctx.fill();
+      // Fins
+      ctx.fillStyle = '#ff8a65';
+      ctx.beginPath(); ctx.ellipse(cx + 10, cy - 45, 30, 15, -0.5, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(cx + 10, cy + 45, 25, 12, 0.5, 0, Math.PI * 2); ctx.fill();
+      // Scales
+      ctx.strokeStyle = 'rgba(255,255,255,0.15)'; ctx.lineWidth = 1;
+      for (let sx = cx - 50; sx < cx + 60; sx += 20) {
+        for (let sy = cy - 30; sy < cy + 30; sy += 18) {
+          ctx.beginPath(); ctx.arc(sx, sy, 9, 0, Math.PI); ctx.stroke();
+        }
+      }
+    }
+  },
+  {
+    triggers: [/pizza/i],
+    description: "Here's a pizza! 🍕",
+    draw(ctx, w, h) {
+      ctx.fillStyle = '#fff8e1'; ctx.fillRect(0, 0, w, h);
+      const cx = w / 2, cy = h / 2;
+      // Pizza base
+      ctx.beginPath(); ctx.arc(cx, cy, 160, 0, Math.PI * 2);
+      ctx.fillStyle = '#ffcc80'; ctx.fill();
+      ctx.strokeStyle = '#e65100'; ctx.lineWidth = 8; ctx.stroke();
+      // Sauce
+      ctx.beginPath(); ctx.arc(cx, cy, 140, 0, Math.PI * 2);
+      ctx.fillStyle = '#e53935'; ctx.fill();
+      // Cheese
+      ctx.beginPath(); ctx.arc(cx, cy, 130, 0, Math.PI * 2);
+      ctx.fillStyle = '#fdd835'; ctx.fill();
+      // Pepperoni
+      const pepPos = [[cx - 50, cy - 40], [cx + 60, cy - 30], [cx - 30, cy + 50], [cx + 40, cy + 60], [cx, cy - 60], [cx - 60, cy + 10], [cx + 20, cy]];
+      pepPos.forEach(([px, py]) => {
+        ctx.beginPath(); ctx.arc(px, py, 18, 0, Math.PI * 2);
+        ctx.fillStyle = '#b71c1c'; ctx.fill();
+      });
+      // Slices
+      ctx.strokeStyle = 'rgba(0,0,0,0.1)'; ctx.lineWidth = 2;
+      for (let i = 0; i < 8; i++) {
+        ctx.beginPath(); ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + Math.cos(i * Math.PI / 4) * 160, cy + Math.sin(i * Math.PI / 4) * 160);
+        ctx.stroke();
+      }
+    }
+  },
+  {
+    triggers: [/cake|birthday/i],
+    description: "Here's a birthday cake! 🎂",
+    draw(ctx, w, h) {
+      ctx.fillStyle = '#fce4ec'; ctx.fillRect(0, 0, w, h);
+      const cx = w / 2, cy = h / 2 + 40;
+      // Bottom layer
+      ctx.fillStyle = '#8d6e63'; ctx.fillRect(cx - 120, cy, 240, 80);
+      ctx.fillStyle = '#d7ccc8'; ctx.fillRect(cx - 120, cy - 5, 240, 15);
+      // Middle layer
+      ctx.fillStyle = '#ef9a9a'; ctx.fillRect(cx - 90, cy - 60, 180, 65);
+      ctx.fillStyle = '#ffcdd2'; ctx.fillRect(cx - 90, cy - 65, 180, 15);
+      // Top layer
+      ctx.fillStyle = '#f48fb1'; ctx.fillRect(cx - 60, cy - 110, 120, 55);
+      ctx.fillStyle = '#f8bbd0'; ctx.fillRect(cx - 60, cy - 115, 120, 15);
+      // Frosting drips
+      ctx.fillStyle = '#fff';
+      for (let x = cx - 55; x <= cx + 55; x += 20) {
+        ctx.beginPath();
+        ctx.arc(x, cy - 110, 8, 0, Math.PI); ctx.fill();
+      }
+      // Candles
+      const candleColors = ['#f44336', '#2196f3', '#4caf50', '#ff9800', '#9c27b0'];
+      for (let i = 0; i < 5; i++) {
+        const cX = cx - 40 + i * 20;
+        ctx.fillStyle = candleColors[i];
+        ctx.fillRect(cX - 3, cy - 145, 6, 35);
+        // Flame
+        ctx.fillStyle = '#ffd54f';
+        ctx.beginPath();
+        ctx.ellipse(cX, cy - 152, 5, 10, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#ff9800';
+        ctx.beginPath();
+        ctx.ellipse(cX, cy - 150, 3, 6, 0, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+  },
+  {
+    triggers: [/ice\s*cream|icecream|sundae/i],
+    description: "Here's ice cream! 🍦",
+    draw(ctx, w, h) {
+      ctx.fillStyle = '#e3f2fd'; ctx.fillRect(0, 0, w, h);
+      const cx = w / 2, cy = h / 2;
+      // Cone
+      ctx.fillStyle = '#d7a86e';
+      ctx.beginPath(); ctx.moveTo(cx - 50, cy + 10); ctx.lineTo(cx, cy + 160); ctx.lineTo(cx + 50, cy + 10); ctx.closePath(); ctx.fill();
+      // Waffle pattern
+      ctx.strokeStyle = '#c49a5f'; ctx.lineWidth = 1;
+      for (let i = 0; i < 6; i++) {
+        ctx.beginPath(); ctx.moveTo(cx - 45 + i * 5, cy + 15 + i * 15); ctx.lineTo(cx + 45 - i * 5, cy + 15 + i * 15); ctx.stroke();
+      }
+      // Scoops
+      const scoopColors = [['#f48fb1', '#ec407a'], ['#fff176', '#fdd835'], ['#a5d6a7', '#66bb6a']];
+      scoopColors.forEach(([c1, c2], i) => {
+        const sY = cy - 10 - i * 50;
+        const sGrad = ctx.createRadialGradient(cx, sY, 5, cx, sY, 45);
+        sGrad.addColorStop(0, c1); sGrad.addColorStop(1, c2);
+        ctx.beginPath(); ctx.arc(cx, sY, 45, 0, Math.PI * 2);
+        ctx.fillStyle = sGrad; ctx.fill();
+      });
+      // Cherry
+      ctx.fillStyle = '#d32f2f';
+      ctx.beginPath(); ctx.arc(cx, cy - 155, 12, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#4caf50'; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(cx, cy - 167); ctx.quadraticCurveTo(cx + 15, cy - 185, cx + 5, cy - 180); ctx.stroke();
+    }
+  },
+  {
+    triggers: [/cloud|cloudy/i],
+    description: "Here's clouds! ☁️",
+    draw(ctx, w, h) {
+      const bg = ctx.createLinearGradient(0, 0, 0, h);
+      bg.addColorStop(0, '#64b5f6'); bg.addColorStop(1, '#bbdefb');
+      ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
+      // Sun
+      ctx.beginPath(); ctx.arc(w * 0.8, h * 0.2, 50, 0, Math.PI * 2);
+      ctx.fillStyle = '#ffd54f'; ctx.fill();
+      // Clouds
+      function drawCloud(x, y, s) {
+        ctx.fillStyle = '#fff';
+        ctx.beginPath(); ctx.arc(x, y, 40 * s, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(x + 35 * s, y - 10 * s, 35 * s, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(x - 35 * s, y, 30 * s, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(x + 60 * s, y + 5 * s, 25 * s, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(x - 15 * s, y + 15 * s, 28 * s, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(x + 25 * s, y + 15 * s, 28 * s, 0, Math.PI * 2); ctx.fill();
+      }
+      drawCloud(w * 0.3, h * 0.25, 1.2);
+      drawCloud(w * 0.7, h * 0.4, 1);
+      drawCloud(w * 0.15, h * 0.55, 0.8);
+      drawCloud(w * 0.55, h * 0.65, 0.9);
+    }
+  },
+  {
+    triggers: [/lightning|thunder|storm/i],
+    description: "Here's a lightning storm! ⚡",
+    draw(ctx, w, h) {
+      ctx.fillStyle = '#1a1a2e'; ctx.fillRect(0, 0, w, h);
+      // Storm clouds
+      ctx.fillStyle = '#37474f';
+      for (let i = 0; i < 8; i++) {
+        ctx.beginPath();
+        ctx.arc(Math.random() * w, 40 + Math.random() * 80, 50 + Math.random() * 60, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      // Lightning bolts
+      for (let b = 0; b < 3; b++) {
+        const startX = 100 + Math.random() * (w - 200);
+        ctx.strokeStyle = '#ffd54f'; ctx.lineWidth = 4;
+        ctx.shadowColor = '#ffd54f'; ctx.shadowBlur = 20;
+        ctx.beginPath();
+        let x = startX, y = 100;
+        ctx.moveTo(x, y);
+        while (y < h * 0.8) {
+          x += (Math.random() - 0.5) * 60;
+          y += 20 + Math.random() * 30;
+          ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+      }
+      ctx.shadowBlur = 0;
+      // Rain
+      ctx.strokeStyle = 'rgba(100,180,255,0.4)'; ctx.lineWidth = 1;
+      for (let i = 0; i < 100; i++) {
+        const rx = Math.random() * w, ry = Math.random() * h;
+        ctx.beginPath(); ctx.moveTo(rx, ry); ctx.lineTo(rx - 3, ry + 15); ctx.stroke();
+      }
+    }
+  },
+  {
+    triggers: [/volcano|lava/i],
+    description: "Here's a volcano! 🌋",
+    draw(ctx, w, h) {
+      const bg = ctx.createLinearGradient(0, 0, 0, h);
+      bg.addColorStop(0, '#ff6f00'); bg.addColorStop(0.4, '#bf360c'); bg.addColorStop(1, '#3e2723');
+      ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
+      // Mountain
+      ctx.fillStyle = '#4e342e';
+      ctx.beginPath(); ctx.moveTo(w * 0.2, h); ctx.lineTo(w * 0.42, h * 0.3); ctx.lineTo(w * 0.58, h * 0.3);
+      ctx.lineTo(w * 0.8, h); ctx.closePath(); ctx.fill();
+      // Crater
+      ctx.fillStyle = '#bf360c';
+      ctx.beginPath(); ctx.ellipse(w * 0.5, h * 0.3, 42, 12, 0, 0, Math.PI * 2); ctx.fill();
+      // Lava eruption
+      for (let i = 0; i < 30; i++) {
+        const lx = w * 0.5 + (Math.random() - 0.5) * 60;
+        const ly = h * 0.3 - Math.random() * 150;
+        ctx.beginPath(); ctx.arc(lx, ly, 3 + Math.random() * 6, 0, Math.PI * 2);
+        ctx.fillStyle = `hsl(${Math.random() * 30 + 10}, 100%, ${50 + Math.random() * 30}%)`;
+        ctx.fill();
+      }
+      // Lava flow
+      ctx.fillStyle = '#ff6f00';
+      ctx.beginPath(); ctx.moveTo(w * 0.47, h * 0.3);
+      ctx.quadraticCurveTo(w * 0.44, h * 0.6, w * 0.35, h);
+      ctx.lineTo(w * 0.5, h);
+      ctx.quadraticCurveTo(w * 0.52, h * 0.5, w * 0.53, h * 0.3);
+      ctx.closePath(); ctx.fill();
+    }
+  },
+  {
+    triggers: [/waterfall/i],
+    description: "Here's a waterfall! 💧",
+    draw(ctx, w, h) {
+      ctx.fillStyle = '#2e7d32'; ctx.fillRect(0, 0, w, h);
+      // Cliff
+      ctx.fillStyle = '#5d4037'; ctx.fillRect(0, 0, w * 0.35, h * 0.45);
+      ctx.fillRect(w * 0.65, 0, w * 0.35, h * 0.45);
+      // Water fall
+      for (let i = 0; i < 30; i++) {
+        ctx.strokeStyle = `rgba(180,230,255,${0.3 + Math.random() * 0.4})`;
+        ctx.lineWidth = 2 + Math.random() * 4;
+        const wx = w * 0.35 + Math.random() * (w * 0.3);
+        ctx.beginPath(); ctx.moveTo(wx, h * 0.45); ctx.lineTo(wx + (Math.random() - 0.5) * 20, h * 0.85); ctx.stroke();
+      }
+      // Pool
+      ctx.fillStyle = '#0288d1';
+      ctx.beginPath(); ctx.ellipse(w / 2, h * 0.88, w * 0.4, 40, 0, 0, Math.PI * 2); ctx.fill();
+      // Mist
+      for (let i = 0; i < 20; i++) {
+        ctx.beginPath();
+        ctx.arc(w * 0.35 + Math.random() * (w * 0.3), h * 0.8 + Math.random() * 30, 10 + Math.random() * 20, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,255,255,${0.05 + Math.random() * 0.1})`; ctx.fill();
+      }
+    }
+  },
+  {
+    triggers: [/planet|earth|globe/i],
+    description: "Here's a planet! 🪐",
+    draw(ctx, w, h) {
+      ctx.fillStyle = '#0a0a2e'; ctx.fillRect(0, 0, w, h);
+      // Stars
+      for (let i = 0; i < 150; i++) {
+        ctx.beginPath(); ctx.arc(Math.random() * w, Math.random() * h, Math.random() * 1.5, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,255,255,${0.3 + Math.random() * 0.5})`; ctx.fill();
+      }
+      const cx = w / 2, cy = h / 2;
+      // Planet
+      const planetGrad = ctx.createRadialGradient(cx - 30, cy - 30, 20, cx, cy, 110);
+      planetGrad.addColorStop(0, '#4fc3f7'); planetGrad.addColorStop(0.5, '#0288d1'); planetGrad.addColorStop(1, '#01579b');
+      ctx.beginPath(); ctx.arc(cx, cy, 110, 0, Math.PI * 2);
+      ctx.fillStyle = planetGrad; ctx.fill();
+      // Land masses
+      ctx.fillStyle = '#66bb6a';
+      ctx.beginPath(); ctx.ellipse(cx - 30, cy - 20, 40, 30, 0.3, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(cx + 40, cy + 20, 25, 35, -0.2, 0, Math.PI * 2); ctx.fill();
+      // Atmosphere glow
+      ctx.beginPath(); ctx.arc(cx, cy, 115, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(100,200,255,0.3)'; ctx.lineWidth = 5; ctx.stroke();
+      // Ring
+      ctx.beginPath(); ctx.ellipse(cx, cy, 170, 30, -0.2, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(200,200,200,0.5)'; ctx.lineWidth = 8; ctx.stroke();
+    }
+  },
+  {
+    triggers: [/car|vehicle/i],
+    description: "Here's a car! 🚗",
+    draw(ctx, w, h) {
+      ctx.fillStyle = '#e0f7fa'; ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#90a4ae'; ctx.fillRect(0, h * 0.7, w, h * 0.3);
+      const cx = w / 2, cy = h * 0.55;
+      // Body
+      ctx.fillStyle = '#e53935';
+      ctx.fillRect(cx - 100, cy, 200, 50);
+      // Top
+      ctx.beginPath(); ctx.moveTo(cx - 60, cy); ctx.lineTo(cx - 30, cy - 50);
+      ctx.lineTo(cx + 50, cy - 50); ctx.lineTo(cx + 80, cy); ctx.closePath();
+      ctx.fillStyle = '#e53935'; ctx.fill();
+      // Windows
+      ctx.fillStyle = '#bbdefb';
+      ctx.beginPath(); ctx.moveTo(cx - 50, cy); ctx.lineTo(cx - 25, cy - 42);
+      ctx.lineTo(cx + 5, cy - 42); ctx.lineTo(cx + 5, cy); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(cx + 12, cy); ctx.lineTo(cx + 12, cy - 42);
+      ctx.lineTo(cx + 42, cy - 42); ctx.lineTo(cx + 70, cy); ctx.closePath(); ctx.fill();
+      // Wheels
+      ctx.fillStyle = '#333';
+      ctx.beginPath(); ctx.arc(cx - 60, cy + 50, 25, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(cx + 60, cy + 50, 25, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#999';
+      ctx.beginPath(); ctx.arc(cx - 60, cy + 50, 12, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(cx + 60, cy + 50, 12, 0, Math.PI * 2); ctx.fill();
+      // Headlights
+      ctx.fillStyle = '#ffd54f';
+      ctx.fillRect(cx + 95, cy + 10, 10, 15);
+      ctx.fillStyle = '#f44336';
+      ctx.fillRect(cx - 105, cy + 10, 10, 15);
+    }
+  },
+  {
+    triggers: [/rocket|spaceship/i],
+    description: "Here's a rocket! 🚀",
+    draw(ctx, w, h) {
+      ctx.fillStyle = '#0a0a2e'; ctx.fillRect(0, 0, w, h);
+      // Stars
+      for (let i = 0; i < 100; i++) {
+        ctx.beginPath(); ctx.arc(Math.random() * w, Math.random() * h, Math.random() * 1.5, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,255,255,${0.3 + Math.random() * 0.5})`; ctx.fill();
+      }
+      const cx = w / 2, cy = h / 2;
+      // Flame
+      ctx.fillStyle = '#ff6f00';
+      ctx.beginPath(); ctx.moveTo(cx - 25, cy + 90); ctx.quadraticCurveTo(cx, cy + 170, cx + 25, cy + 90); ctx.fill();
+      ctx.fillStyle = '#ffd54f';
+      ctx.beginPath(); ctx.moveTo(cx - 15, cy + 90); ctx.quadraticCurveTo(cx, cy + 140, cx + 15, cy + 90); ctx.fill();
+      // Body
+      ctx.fillStyle = '#eceff1';
+      ctx.beginPath(); ctx.moveTo(cx, cy - 120); ctx.quadraticCurveTo(cx - 40, cy - 40, cx - 35, cy + 90);
+      ctx.lineTo(cx + 35, cy + 90); ctx.quadraticCurveTo(cx + 40, cy - 40, cx, cy - 120); ctx.closePath(); ctx.fill();
+      // Window
+      ctx.beginPath(); ctx.arc(cx, cy - 20, 18, 0, Math.PI * 2);
+      ctx.fillStyle = '#42a5f5'; ctx.fill();
+      ctx.strokeStyle = '#90a4ae'; ctx.lineWidth = 3; ctx.stroke();
+      // Nose
+      ctx.fillStyle = '#e53935';
+      ctx.beginPath(); ctx.moveTo(cx, cy - 120); ctx.quadraticCurveTo(cx - 15, cy - 90, cx - 20, cy - 70);
+      ctx.lineTo(cx + 20, cy - 70); ctx.quadraticCurveTo(cx + 15, cy - 90, cx, cy - 120); ctx.closePath(); ctx.fill();
+      // Fins
+      ctx.fillStyle = '#e53935';
+      ctx.beginPath(); ctx.moveTo(cx - 35, cy + 50); ctx.lineTo(cx - 60, cy + 95); ctx.lineTo(cx - 35, cy + 90); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(cx + 35, cy + 50); ctx.lineTo(cx + 60, cy + 95); ctx.lineTo(cx + 35, cy + 90); ctx.closePath(); ctx.fill();
+    }
+  },
+  {
+    triggers: [/umbrella/i],
+    description: "Here's an umbrella! ☂️",
+    draw(ctx, w, h) {
+      const bg = ctx.createLinearGradient(0, 0, 0, h);
+      bg.addColorStop(0, '#546e7a'); bg.addColorStop(1, '#37474f');
+      ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
+      // Rain
+      ctx.strokeStyle = 'rgba(100,180,255,0.3)'; ctx.lineWidth = 1.5;
+      for (let i = 0; i < 60; i++) {
+        const rx = Math.random() * w, ry = Math.random() * h;
+        ctx.beginPath(); ctx.moveTo(rx, ry); ctx.lineTo(rx - 4, ry + 20); ctx.stroke();
+      }
+      const cx = w / 2, cy = h / 2;
+      // Canopy
+      ctx.beginPath(); ctx.arc(cx, cy - 20, 120, Math.PI, 0);
+      ctx.fillStyle = '#e53935'; ctx.fill();
+      // Segments
+      ctx.strokeStyle = '#c62828'; ctx.lineWidth = 2;
+      for (let i = 1; i < 6; i++) {
+        const angle = Math.PI + (i / 6) * Math.PI;
+        ctx.beginPath(); ctx.moveTo(cx, cy - 20);
+        ctx.lineTo(cx + Math.cos(angle) * 120, cy - 20 + Math.sin(angle) * 120); ctx.stroke();
+      }
+      // Handle
+      ctx.strokeStyle = '#5d4037'; ctx.lineWidth = 6; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(cx, cy - 20); ctx.lineTo(cx, cy + 100); ctx.stroke();
+      // Hook
+      ctx.beginPath(); ctx.arc(cx + 15, cy + 100, 15, 0, Math.PI); ctx.stroke();
+    }
+  },
+  {
+    triggers: [/crown|king|queen/i],
+    description: "Here's a crown! 👑",
+    draw(ctx, w, h) {
+      const bg = ctx.createLinearGradient(0, 0, 0, h);
+      bg.addColorStop(0, '#1a237e'); bg.addColorStop(1, '#0d1b4e');
+      ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
+      const cx = w / 2, cy = h / 2;
+      // Crown base
+      const crownGrad = ctx.createLinearGradient(cx - 100, cy - 60, cx + 100, cy + 40);
+      crownGrad.addColorStop(0, '#ffd54f'); crownGrad.addColorStop(0.5, '#ffb300'); crownGrad.addColorStop(1, '#ff8f00');
+      ctx.fillStyle = crownGrad;
+      ctx.beginPath();
+      ctx.moveTo(cx - 100, cy + 40);
+      ctx.lineTo(cx - 100, cy - 20); ctx.lineTo(cx - 60, cy); ctx.lineTo(cx - 30, cy - 60);
+      ctx.lineTo(cx, cy - 10); ctx.lineTo(cx + 30, cy - 60); ctx.lineTo(cx + 60, cy);
+      ctx.lineTo(cx + 100, cy - 20); ctx.lineTo(cx + 100, cy + 40);
+      ctx.closePath(); ctx.fill();
+      // Band
+      ctx.fillStyle = '#e65100'; ctx.fillRect(cx - 100, cy + 25, 200, 15);
+      // Jewels
+      const jewels = [[-60, cy - 5, '#e53935'], [0, cy - 35, '#2196f3'], [60, cy - 5, '#4caf50']];
+      jewels.forEach(([jx, jy, jc]) => {
+        ctx.beginPath(); ctx.arc(cx + jx, jy, 10, 0, Math.PI * 2);
+        ctx.fillStyle = jc; ctx.fill();
+        ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; ctx.stroke();
+      });
+      // Sparkles
+      for (let i = 0; i < 25; i++) {
+        ctx.beginPath();
+        ctx.arc(cx + (Math.random() - 0.5) * 300, cy + (Math.random() - 0.5) * 250, Math.random() * 2, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,215,0,${Math.random() * 0.6})`; ctx.fill();
+      }
+    }
+  },
+  {
+    triggers: [/wave|waves/i],
+    description: "Here's a wave pattern! 🌊",
+    draw(ctx, w, h) {
+      ctx.fillStyle = '#0d47a1'; ctx.fillRect(0, 0, w, h);
+      const colors = ['#1565c0', '#1976d2', '#1e88e5', '#2196f3', '#42a5f5', '#64b5f6', '#90caf9'];
+      for (let i = 0; i < colors.length; i++) {
+        ctx.beginPath();
+        const baseY = 50 + i * (h / colors.length);
+        ctx.moveTo(0, baseY);
+        for (let x = 0; x <= w; x += 5) {
+          ctx.lineTo(x, baseY + Math.sin(x * 0.02 + i * 1.5) * 30 + Math.sin(x * 0.01) * 15);
+        }
+        ctx.lineTo(w, h); ctx.lineTo(0, h); ctx.closePath();
+        ctx.fillStyle = colors[i]; ctx.fill();
+      }
+    }
+  },
+  {
+    triggers: [/zigzag/i],
+    description: "Here's a zigzag pattern! ⚡",
+    draw(ctx, w, h) {
+      ctx.fillStyle = '#212121'; ctx.fillRect(0, 0, w, h);
+      const colors = ['#f44336', '#ff9800', '#fdd835', '#4caf50', '#2196f3', '#9c27b0'];
+      const zigH = h / colors.length;
+      colors.forEach((c, i) => {
+        ctx.strokeStyle = c; ctx.lineWidth = 4;
+        ctx.beginPath();
+        const baseY = zigH * i + zigH / 2;
+        for (let x = 0; x <= w; x += 30) {
+          ctx.lineTo(x, baseY + ((x / 30) % 2 === 0 ? -15 : 15));
+        }
+        ctx.stroke();
+      });
+    }
+  },
+  {
+    triggers: [/concentric|rings|target/i],
+    description: "Here's concentric circles! 🎯",
+    draw(ctx, w, h) {
+      ctx.fillStyle = '#fafafa'; ctx.fillRect(0, 0, w, h);
+      const cx = w / 2, cy = h / 2;
+      const colors = ['#f44336', '#fff', '#f44336', '#fff', '#f44336', '#fff', '#f44336'];
+      for (let i = colors.length - 1; i >= 0; i--) {
+        ctx.beginPath(); ctx.arc(cx, cy, 30 + i * 25, 0, Math.PI * 2);
+        ctx.fillStyle = colors[i]; ctx.fill();
+      }
+    }
+  },
+  {
+    triggers: [/pixel|retro|8.?bit/i],
+    description: "Here's pixel art! 🕹️",
+    draw(ctx, w, h) {
+      ctx.fillStyle = '#1a1a2e'; ctx.fillRect(0, 0, w, h);
+      const size = 16;
+      const palette = ['#e53935', '#ff9800', '#fdd835', '#4caf50', '#2196f3', '#9c27b0', '#00bcd4', '#ff5722'];
+      // Random pixel art creature
+      const gridW = 16, gridH = 16;
+      const offsetX = (w - gridW * size) / 2, offsetY = (h - gridH * size) / 2;
+      const grid = [];
+      for (let y = 0; y < gridH; y++) {
+        grid[y] = [];
+        for (let x = 0; x < Math.ceil(gridW / 2); x++) {
+          grid[y][x] = Math.random() > 0.5 ? palette[Math.floor(Math.random() * palette.length)] : null;
+        }
+      }
+      // Mirror and draw
+      for (let y = 0; y < gridH; y++) {
+        for (let x = 0; x < gridW; x++) {
+          const mx = x < gridW / 2 ? x : gridW - 1 - x;
+          if (grid[y][mx]) {
+            ctx.fillStyle = grid[y][mx];
+            ctx.fillRect(offsetX + x * size, offsetY + y * size, size, size);
+          }
+        }
+      }
+    }
+  },
+];
+
+// Merge extra art templates
+artTemplates.push(...extraArtTemplates);

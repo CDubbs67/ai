@@ -232,6 +232,23 @@ console.log('Hello, World!');"></textarea>
                         <button class="code-btn code-btn-clear" id="clear-art-btn">🗑️ Clear</button>
                     </div>
                 </div>
+                <div class="art-toolbar" id="art-toolbar">
+                    <div class="art-tools">
+                        <button class="art-tool-btn active" id="tool-draw" title="Draw">✏️</button>
+                        <button class="art-tool-btn" id="tool-eraser" title="Eraser">⬜</button>
+                        <button class="art-tool-btn" id="tool-circle" title="Circle">🔵</button>
+                        <button class="art-tool-btn" id="tool-rect" title="Rectangle">◼️</button>
+                        <button class="art-tool-btn" id="tool-text" title="Text">📝</button>
+                        <button class="art-tool-btn" id="tool-undo" title="Undo">↩️</button>
+                    </div>
+                    <div class="art-controls">
+                        <input type="color" id="art-color" value="#ffffff" title="Color">
+                        <label class="art-size-label">
+                            <span>Size</span>
+                            <input type="range" id="art-brush-size" min="1" max="40" value="5">
+                        </label>
+                    </div>
+                </div>
                 <div class="art-canvas-body">
                     <canvas id="art-canvas" width="512" height="512"></canvas>
                     <span class="art-canvas-placeholder" id="art-placeholder">Describe an image and I'll draw it for
