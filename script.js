@@ -1369,19 +1369,19 @@ function renderHistory() {
 
 
 // ===== Mode Toggle =====
-let currentMode = 'conversation'; // 'conversation', 'research', or 'coding'
+let currentMode = 'conversation'; // 'conversation', 'research', 'coding', or 'art'
 const modeConversationBtn = document.getElementById('mode-conversation');
 const modeResearchBtn = document.getElementById('mode-research');
 const modeCodingBtn = document.getElementById('mode-coding');
+const modeArtBtn = document.getElementById('mode-art');
 const suggestionsContainer = document.getElementById('suggestions');
 const codingSection = document.getElementById('coding-section');
+const artSection = document.getElementById('art-section');
 
 const conversationSuggestions = [
   { label: 'Hi! 👋', query: 'Hi!' },
   { label: 'Tell me a joke', query: 'Tell me a joke' },
   { label: 'Fun fact', query: 'Tell me a fun fact' },
-  { label: 'Tell me a riddle', query: 'Tell me a riddle' },
-  { label: 'What can you do?', query: 'What can you do?' },
 ];
 
 const researchSuggestions = [
@@ -1407,20 +1407,30 @@ function setMode(mode) {
   modeConversationBtn.classList.toggle('active', mode === 'conversation');
   modeResearchBtn.classList.toggle('active', mode === 'research');
   modeCodingBtn.classList.toggle('active', mode === 'coding');
+  modeArtBtn.classList.toggle('active', mode === 'art');
 
-  if (mode === 'coding') {
-    // Hide search-related UI, show code editor
-    document.getElementById('search-container').style.display = 'none';
+  // Hide both special sections by default
+  codingSection.classList.remove('visible');
+  artSection.classList.remove('visible');
+
+  if (mode === 'coding' || mode === 'art') {
+    // Hide search-related UI
+    document.getElementById('search-bar').style.display = 'none';
+    suggestionsContainer.style.display = 'none';
+    hero.classList.add('compact');
     answerSection.classList.remove('visible');
     historySection.style.display = 'none';
-    codingSection.classList.add('visible');
+
+    if (mode === 'coding') codingSection.classList.add('visible');
+    if (mode === 'art') artSection.classList.add('visible');
     return;
   }
 
-  // Not coding mode — restore search UI
-  document.getElementById('search-container').style.display = '';
+  // Not coding/art mode — restore search UI
+  document.getElementById('search-bar').style.display = '';
+  suggestionsContainer.style.display = '';
+  hero.classList.remove('compact');
   historySection.style.display = '';
-  codingSection.classList.remove('visible');
 
   // Update placeholder
   searchInput.placeholder = mode === 'conversation'
@@ -1447,6 +1457,7 @@ function setMode(mode) {
 modeConversationBtn.addEventListener('click', () => setMode('conversation'));
 modeResearchBtn.addEventListener('click', () => setMode('research'));
 modeCodingBtn.addEventListener('click', () => setMode('coding'));
+modeArtBtn.addEventListener('click', () => setMode('art'));
 
 // ===== Code Execution =====
 const codeInput = document.getElementById('code-input');
@@ -2112,3 +2123,811 @@ renderCustomThemes();
 // Load saved theme on start
 const savedTheme = localStorage.getItem('askNovaTheme');
 if (savedTheme) applyTheme(savedTheme);
+
+// ===== Art Studio Engine =====
+const artCanvas = document.getElementById('art-canvas');
+const artCtx = artCanvas.getContext('2d');
+const artPlaceholder = document.getElementById('art-placeholder');
+const artChatMessages = document.getElementById('art-chat-messages');
+const artChatInput = document.getElementById('art-chat-input');
+const artChatSend = document.getElementById('art-chat-send');
+const downloadArtBtn = document.getElementById('download-art-btn');
+const clearArtBtn = document.getElementById('clear-art-btn');
+
+const artTemplates = [
+  {
+    triggers: [/sunset/i, /sunrise/i],
+    description: "Here's a beautiful sunset! 🌅",
+    draw(ctx, w, h) {
+      const sky = ctx.createLinearGradient(0, 0, 0, h);
+      sky.addColorStop(0, '#0c0033');
+      sky.addColorStop(0.3, '#2d1b69');
+      sky.addColorStop(0.5, '#ff6b35');
+      sky.addColorStop(0.7, '#ff9a56');
+      sky.addColorStop(0.85, '#ffd93d');
+      sky.addColorStop(1, '#ff6b6b');
+      ctx.fillStyle = sky;
+      ctx.fillRect(0, 0, w, h);
+      // Sun
+      ctx.beginPath();
+      ctx.arc(w / 2, h * 0.55, 60, 0, Math.PI * 2);
+      const sunGrad = ctx.createRadialGradient(w / 2, h * 0.55, 10, w / 2, h * 0.55, 60);
+      sunGrad.addColorStop(0, '#fff7ae');
+      sunGrad.addColorStop(0.5, '#ffd93d');
+      sunGrad.addColorStop(1, '#ff6b35');
+      ctx.fillStyle = sunGrad;
+      ctx.fill();
+      // Water
+      ctx.fillStyle = 'rgba(0,0,80,0.4)';
+      ctx.fillRect(0, h * 0.65, w, h * 0.35);
+      // Reflection
+      for (let i = 0; i < 20; i++) {
+        ctx.fillStyle = `rgba(255,200,100,${0.1 + Math.random() * 0.15})`;
+        ctx.fillRect(w / 2 - 30 + Math.random() * 60, h * 0.65 + i * 8, 3 + Math.random() * 15, 2);
+      }
+    }
+  },
+  {
+    triggers: [/star|night\s*sky|galaxy|space|cosmos/i],
+    description: "Here's a starry night sky! ✨",
+    draw(ctx, w, h) {
+      const bg = ctx.createLinearGradient(0, 0, 0, h);
+      bg.addColorStop(0, '#000011');
+      bg.addColorStop(0.5, '#0a0a3a');
+      bg.addColorStop(1, '#1a0a2e');
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, w, h);
+      // Nebula
+      for (let i = 0; i < 5; i++) {
+        const x = Math.random() * w, y = Math.random() * h;
+        const nebula = ctx.createRadialGradient(x, y, 0, x, y, 100 + Math.random() * 100);
+        const colors = ['rgba(138,43,226,0.08)', 'rgba(0,100,200,0.06)', 'rgba(200,50,100,0.05)'];
+        nebula.addColorStop(0, colors[i % 3]);
+        nebula.addColorStop(1, 'transparent');
+        ctx.fillStyle = nebula;
+        ctx.fillRect(0, 0, w, h);
+      }
+      // Stars
+      for (let i = 0; i < 300; i++) {
+        const x = Math.random() * w, y = Math.random() * h;
+        const size = Math.random() * 2.5;
+        ctx.beginPath();
+        ctx.arc(x, y, size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,255,255,${0.3 + Math.random() * 0.7})`;
+        ctx.fill();
+      }
+      // Big stars
+      for (let i = 0; i < 8; i++) {
+        const x = Math.random() * w, y = Math.random() * h * 0.7;
+        ctx.beginPath();
+        ctx.arc(x, y, 2 + Math.random() * 2, 0, Math.PI * 2);
+        ctx.fillStyle = ['#fff', '#aaf', '#ffa'][i % 3];
+        ctx.fill();
+      }
+    }
+  },
+  {
+    triggers: [/mountain/i, /landscape/i],
+    description: "Here's a mountain landscape! ⛰️",
+    draw(ctx, w, h) {
+      const sky = ctx.createLinearGradient(0, 0, 0, h * 0.6);
+      sky.addColorStop(0, '#1a2a6c');
+      sky.addColorStop(1, '#b21f1f');
+      ctx.fillStyle = sky;
+      ctx.fillRect(0, 0, w, h);
+      // Mountains
+      const colors = ['#2d3436', '#636e72', '#b2bec3'];
+      for (let m = 0; m < 3; m++) {
+        ctx.fillStyle = colors[m];
+        ctx.beginPath();
+        ctx.moveTo(0, h);
+        for (let x = 0; x <= w; x += 20) {
+          const baseY = h * (0.35 + m * 0.12);
+          ctx.lineTo(x, baseY + Math.sin(x * 0.01 + m * 2) * 80 + Math.sin(x * 0.03 + m) * 30);
+        }
+        ctx.lineTo(w, h); ctx.closePath(); ctx.fill();
+      }
+      // Snow caps
+      ctx.fillStyle = '#dfe6e9';
+      ctx.beginPath(); ctx.moveTo(w * 0.3, h * 0.32);
+      ctx.lineTo(w * 0.25, h * 0.4); ctx.lineTo(w * 0.35, h * 0.4); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(w * 0.65, h * 0.28);
+      ctx.lineTo(w * 0.6, h * 0.38); ctx.lineTo(w * 0.7, h * 0.38); ctx.closePath(); ctx.fill();
+    }
+  },
+  {
+    triggers: [/ocean|sea|wave|beach/i],
+    description: "Here's an ocean scene! 🌊",
+    draw(ctx, w, h) {
+      const sky = ctx.createLinearGradient(0, 0, 0, h * 0.5);
+      sky.addColorStop(0, '#87ceeb');
+      sky.addColorStop(1, '#e0f7ff');
+      ctx.fillStyle = sky;
+      ctx.fillRect(0, 0, w, h);
+      // Ocean
+      for (let y = h * 0.45; y < h; y += 4) {
+        const progress = (y - h * 0.45) / (h * 0.55);
+        const r = 0, g = Math.floor(80 + progress * 30), b = Math.floor(180 - progress * 60);
+        ctx.fillStyle = `rgb(${r},${g},${b})`;
+        for (let x = 0; x < w; x += 2) {
+          const wave = Math.sin(x * 0.02 + y * 0.05) * 6;
+          ctx.fillRect(x, y + wave, 2, 4);
+        }
+      }
+      // Sun
+      ctx.beginPath(); ctx.arc(w * 0.75, h * 0.2, 40, 0, Math.PI * 2);
+      ctx.fillStyle = '#ffd93d'; ctx.fill();
+    }
+  },
+  {
+    triggers: [/rainbow/i],
+    description: "Here's a rainbow! 🌈",
+    draw(ctx, w, h) {
+      ctx.fillStyle = '#87ceeb'; ctx.fillRect(0, 0, w, h);
+      // Grass
+      ctx.fillStyle = '#4caf50'; ctx.fillRect(0, h * 0.7, w, h * 0.3);
+      const colors = ['#ff0000', '#ff7700', '#ffff00', '#00cc00', '#0000ff', '#4b0082', '#9400d3'];
+      const cx = w / 2, cy = h * 0.8;
+      for (let i = 0; i < colors.length; i++) {
+        ctx.beginPath();
+        ctx.arc(cx, cy, 220 - i * 18, Math.PI, 0);
+        ctx.strokeStyle = colors[i]; ctx.lineWidth = 16; ctx.stroke();
+      }
+    }
+  },
+  {
+    triggers: [/smiley|happy\s*face|smile/i],
+    description: "Here's a smiley face! 😊",
+    draw(ctx, w, h) {
+      ctx.fillStyle = '#fff3e0'; ctx.fillRect(0, 0, w, h);
+      const cx = w / 2, cy = h / 2, r = 150;
+      // Face
+      ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      const faceGrad = ctx.createRadialGradient(cx, cy - 30, 20, cx, cy, r);
+      faceGrad.addColorStop(0, '#ffe066'); faceGrad.addColorStop(1, '#ffcc02');
+      ctx.fillStyle = faceGrad; ctx.fill();
+      ctx.strokeStyle = '#e6a800'; ctx.lineWidth = 3; ctx.stroke();
+      // Eyes
+      ctx.fillStyle = '#333'; ctx.beginPath(); ctx.arc(cx - 50, cy - 30, 18, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(cx + 50, cy - 30, 18, 0, Math.PI * 2); ctx.fill();
+      // Eye shine
+      ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(cx - 44, cy - 36, 6, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(cx + 56, cy - 36, 6, 0, Math.PI * 2); ctx.fill();
+      // Mouth
+      ctx.beginPath(); ctx.arc(cx, cy + 15, 70, 0.1 * Math.PI, 0.9 * Math.PI);
+      ctx.strokeStyle = '#333'; ctx.lineWidth = 5; ctx.lineCap = 'round'; ctx.stroke();
+      // Cheeks
+      ctx.fillStyle = 'rgba(255,100,100,0.25)'; ctx.beginPath(); ctx.arc(cx - 90, cy + 20, 25, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(cx + 90, cy + 20, 25, 0, Math.PI * 2); ctx.fill();
+    }
+  },
+  {
+    triggers: [/heart|love/i],
+    description: "Here's a heart! ❤️",
+    draw(ctx, w, h) {
+      const bg = ctx.createLinearGradient(0, 0, w, h);
+      bg.addColorStop(0, '#2d0a3e'); bg.addColorStop(1, '#1a0a2e');
+      ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
+      const cx = w / 2, cy = h / 2;
+      const heartGrad = ctx.createRadialGradient(cx, cy, 20, cx, cy, 160);
+      heartGrad.addColorStop(0, '#ff4081'); heartGrad.addColorStop(1, '#c62828');
+      ctx.fillStyle = heartGrad;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy + 80);
+      ctx.bezierCurveTo(cx - 180, cy - 40, cx - 100, cy - 160, cx, cy - 60);
+      ctx.bezierCurveTo(cx + 100, cy - 160, cx + 180, cy - 40, cx, cy + 80);
+      ctx.fill();
+      // Glow
+      for (let i = 0; i < 30; i++) {
+        ctx.beginPath();
+        ctx.arc(cx + (Math.random() - 0.5) * 300, cy + (Math.random() - 0.5) * 300, Math.random() * 3, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,100,150,${Math.random() * 0.5})`;
+        ctx.fill();
+      }
+    }
+  },
+  {
+    triggers: [/flower|rose|daisy|garden/i],
+    description: "Here's a flower! 🌸",
+    draw(ctx, w, h) {
+      ctx.fillStyle = '#e8f5e9'; ctx.fillRect(0, 0, w, h);
+      const cx = w / 2, cy = h / 2;
+      // Stem
+      ctx.strokeStyle = '#4caf50'; ctx.lineWidth = 8;
+      ctx.beginPath(); ctx.moveTo(cx, cy + 40); ctx.lineTo(cx, h * 0.85); ctx.stroke();
+      // Leaf
+      ctx.fillStyle = '#66bb6a';
+      ctx.beginPath(); ctx.ellipse(cx + 30, h * 0.7, 30, 15, 0.5, 0, Math.PI * 2); ctx.fill();
+      // Petals
+      const petalColors = ['#ff80ab', '#ff4081', '#f50057', '#e91e63', '#f06292', '#ff80ab'];
+      for (let i = 0; i < 6; i++) {
+        ctx.save(); ctx.translate(cx, cy);
+        ctx.rotate((i / 6) * Math.PI * 2);
+        ctx.fillStyle = petalColors[i];
+        ctx.beginPath(); ctx.ellipse(0, -55, 30, 55, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      }
+      // Center
+      ctx.beginPath(); ctx.arc(cx, cy, 25, 0, Math.PI * 2);
+      ctx.fillStyle = '#ffd54f'; ctx.fill();
+      ctx.beginPath(); ctx.arc(cx, cy, 15, 0, Math.PI * 2);
+      ctx.fillStyle = '#ffb300'; ctx.fill();
+    }
+  },
+  {
+    triggers: [/tree/i],
+    description: "Here's a tree! 🌳",
+    draw(ctx, w, h) {
+      const bg = ctx.createLinearGradient(0, 0, 0, h);
+      bg.addColorStop(0, '#87ceeb'); bg.addColorStop(1, '#e0f7fa');
+      ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
+      // Ground
+      ctx.fillStyle = '#8bc34a'; ctx.fillRect(0, h * 0.75, w, h * 0.25);
+      // Trunk
+      ctx.fillStyle = '#5d4037';
+      ctx.fillRect(w / 2 - 20, h * 0.4, 40, h * 0.35);
+      // Leaves (circles)
+      const greens = ['#2e7d32', '#388e3c', '#43a047', '#4caf50', '#66bb6a'];
+      for (let i = 0; i < 30; i++) {
+        ctx.beginPath();
+        ctx.arc(w / 2 + (Math.random() - 0.5) * 160, h * 0.2 + Math.random() * 130, 20 + Math.random() * 30, 0, Math.PI * 2);
+        ctx.fillStyle = greens[Math.floor(Math.random() * greens.length)];
+        ctx.fill();
+      }
+    }
+  },
+  {
+    triggers: [/city|skyline|building/i],
+    description: "Here's a city skyline! 🏙️",
+    draw(ctx, w, h) {
+      const sky = ctx.createLinearGradient(0, 0, 0, h * 0.6);
+      sky.addColorStop(0, '#0a0e27'); sky.addColorStop(1, '#1a237e');
+      ctx.fillStyle = sky; ctx.fillRect(0, 0, w, h);
+      // Stars
+      for (let i = 0; i < 80; i++) {
+        ctx.beginPath(); ctx.arc(Math.random() * w, Math.random() * h * 0.5, Math.random() * 1.5, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,255,255,${0.3 + Math.random() * 0.7})`; ctx.fill();
+      }
+      // Buildings
+      const buildingColors = ['#1a1a2e', '#16213e', '#0f3460', '#1a1a3e', '#2a2a4e'];
+      for (let i = 0; i < 20; i++) {
+        const bw = 25 + Math.random() * 50;
+        const bh = 80 + Math.random() * 200;
+        const bx = i * (w / 20) + Math.random() * 10;
+        ctx.fillStyle = buildingColors[i % buildingColors.length];
+        ctx.fillRect(bx, h - bh, bw, bh);
+        // Windows
+        for (let wy = h - bh + 10; wy < h - 10; wy += 15) {
+          for (let wx = bx + 5; wx < bx + bw - 5; wx += 10) {
+            ctx.fillStyle = Math.random() > 0.3 ? '#ffd54f' : '#333';
+            ctx.fillRect(wx, wy, 5, 8);
+          }
+        }
+      }
+      // Ground
+      ctx.fillStyle = '#1a1a1a'; ctx.fillRect(0, h * 0.92, w, h * 0.08);
+    }
+  },
+  {
+    triggers: [/firework/i],
+    description: "Here's fireworks! 🎆",
+    draw(ctx, w, h) {
+      ctx.fillStyle = '#0a0a1a'; ctx.fillRect(0, 0, w, h);
+      const fireworkColors = [
+        ['#ff4081', '#ff80ab', '#f8bbd0'],
+        ['#40c4ff', '#80d8ff', '#b3e5fc'],
+        ['#69f0ae', '#b9f6ca', '#e8f5e9'],
+        ['#ffd740', '#ffe57f', '#fff8e1'],
+        ['#e040fb', '#ea80fc', '#f3e5f5'],
+      ];
+      for (let f = 0; f < 5; f++) {
+        const cx = 80 + Math.random() * (w - 160);
+        const cy = 60 + Math.random() * (h * 0.5);
+        const colors = fireworkColors[f];
+        for (let i = 0; i < 60; i++) {
+          const angle = (i / 60) * Math.PI * 2;
+          const dist = 30 + Math.random() * 90;
+          const ex = cx + Math.cos(angle) * dist;
+          const ey = cy + Math.sin(angle) * dist;
+          ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(ex, ey);
+          ctx.strokeStyle = colors[Math.floor(Math.random() * colors.length)];
+          ctx.lineWidth = 1.5; ctx.stroke();
+          ctx.beginPath(); ctx.arc(ex, ey, 2, 0, Math.PI * 2);
+          ctx.fillStyle = colors[0]; ctx.fill();
+        }
+      }
+    }
+  },
+  {
+    triggers: [/snowflake|snow|winter/i],
+    description: "Here's a snowflake! ❄️",
+    draw(ctx, w, h) {
+      const bg = ctx.createLinearGradient(0, 0, 0, h);
+      bg.addColorStop(0, '#1a237e'); bg.addColorStop(1, '#283593');
+      ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
+      const cx = w / 2, cy = h / 2;
+      ctx.strokeStyle = '#e3f2fd'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+      for (let i = 0; i < 6; i++) {
+        ctx.save(); ctx.translate(cx, cy); ctx.rotate((i / 6) * Math.PI * 2);
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -120); ctx.stroke();
+        // Branches
+        for (let b = 1; b <= 3; b++) {
+          const by = -b * 35;
+          ctx.beginPath(); ctx.moveTo(0, by); ctx.lineTo(-20, by - 20); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(0, by); ctx.lineTo(20, by - 20); ctx.stroke();
+        }
+        ctx.restore();
+      }
+      // Snow
+      for (let i = 0; i < 100; i++) {
+        ctx.beginPath(); ctx.arc(Math.random() * w, Math.random() * h, Math.random() * 3, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,255,255,${0.2 + Math.random() * 0.5})`; ctx.fill();
+      }
+    }
+  },
+  {
+    triggers: [/gradient|abstract|color/i],
+    description: "Here's an abstract gradient! 🎨",
+    draw(ctx, w, h) {
+      const colors = [
+        ['#667eea', '#764ba2'],
+        ['#f093fb', '#f5576c'],
+        ['#4facfe', '#00f2fe'],
+        ['#43e97b', '#38f9d7'],
+        ['#fa709a', '#fee140'],
+      ];
+      const pick = colors[Math.floor(Math.random() * colors.length)];
+      const angle = Math.random() * Math.PI;
+      const grad = ctx.createLinearGradient(
+        w / 2 + Math.cos(angle) * w / 2, h / 2 + Math.sin(angle) * h / 2,
+        w / 2 - Math.cos(angle) * w / 2, h / 2 - Math.sin(angle) * h / 2
+      );
+      grad.addColorStop(0, pick[0]); grad.addColorStop(1, pick[1]);
+      ctx.fillStyle = grad; ctx.fillRect(0, 0, w, h);
+      // Floating circles
+      for (let i = 0; i < 15; i++) {
+        ctx.beginPath();
+        ctx.arc(Math.random() * w, Math.random() * h, 20 + Math.random() * 80, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,255,255,${0.03 + Math.random() * 0.08})`;
+        ctx.fill();
+      }
+    }
+  },
+  {
+    triggers: [/checkerboard|chess|checker/i],
+    description: "Here's a checkerboard! ♟️",
+    draw(ctx, w, h) {
+      const size = 64;
+      for (let y = 0; y < h; y += size) {
+        for (let x = 0; x < w; x += size) {
+          ctx.fillStyle = ((x + y) / size) % 2 === 0 ? '#f5f5f5' : '#333';
+          ctx.fillRect(x, y, size, size);
+        }
+      }
+    }
+  },
+  {
+    triggers: [/polka\s*dot/i],
+    description: "Here's a polka dot pattern! 🔴",
+    draw(ctx, w, h) {
+      ctx.fillStyle = '#fff3e0'; ctx.fillRect(0, 0, w, h);
+      const colors = ['#f44336', '#e91e63', '#9c27b0', '#2196f3', '#4caf50', '#ff9800'];
+      const gap = 60;
+      for (let y = gap / 2; y < h; y += gap) {
+        for (let x = gap / 2; x < w; x += gap) {
+          ctx.beginPath(); ctx.arc(x, y, 15, 0, Math.PI * 2);
+          ctx.fillStyle = colors[Math.floor(Math.random() * colors.length)];
+          ctx.fill();
+        }
+      }
+    }
+  },
+  {
+    triggers: [/stripe/i],
+    description: "Here's a stripe pattern! 🏳️‍🌈",
+    draw(ctx, w, h) {
+      const colors = ['#e53935', '#fb8c00', '#fdd835', '#43a047', '#1e88e5', '#8e24aa'];
+      const stripeH = h / colors.length;
+      colors.forEach((c, i) => { ctx.fillStyle = c; ctx.fillRect(0, i * stripeH, w, stripeH); });
+    }
+  },
+  {
+    triggers: [/spiral/i],
+    description: "Here's a spiral! 🌀",
+    draw(ctx, w, h) {
+      ctx.fillStyle = '#1a1a2e'; ctx.fillRect(0, 0, w, h);
+      const cx = w / 2, cy = h / 2;
+      ctx.beginPath();
+      for (let t = 0; t < 30; t += 0.02) {
+        const x = cx + t * 8 * Math.cos(t);
+        const y = cy + t * 8 * Math.sin(t);
+        if (t === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.strokeStyle = `hsl(${Math.random() * 360}, 80%, 65%)`; ctx.lineWidth = 3; ctx.stroke();
+    }
+  },
+  {
+    triggers: [/house|home/i],
+    description: "Here's a cute house! 🏠",
+    draw(ctx, w, h) {
+      ctx.fillStyle = '#87ceeb'; ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#66bb6a'; ctx.fillRect(0, h * 0.7, w, h * 0.3);
+      // House body
+      ctx.fillStyle = '#fff3e0'; ctx.fillRect(w * 0.3, h * 0.4, w * 0.4, h * 0.3);
+      // Roof
+      ctx.fillStyle = '#d32f2f'; ctx.beginPath();
+      ctx.moveTo(w * 0.25, h * 0.4); ctx.lineTo(w * 0.5, h * 0.2); ctx.lineTo(w * 0.75, h * 0.4);
+      ctx.closePath(); ctx.fill();
+      // Door
+      ctx.fillStyle = '#5d4037'; ctx.fillRect(w * 0.45, h * 0.55, w * 0.1, h * 0.15);
+      ctx.fillStyle = '#ffd54f'; ctx.beginPath(); ctx.arc(w * 0.53, h * 0.63, 3, 0, Math.PI * 2); ctx.fill();
+      // Windows
+      ctx.fillStyle = '#bbdefb';
+      ctx.fillRect(w * 0.33, h * 0.45, w * 0.08, h * 0.08);
+      ctx.fillRect(w * 0.59, h * 0.45, w * 0.08, h * 0.08);
+      // Sun
+      ctx.beginPath(); ctx.arc(w * 0.85, h * 0.12, 30, 0, Math.PI * 2);
+      ctx.fillStyle = '#ffd54f'; ctx.fill();
+    }
+  },
+  {
+    triggers: [/robot/i],
+    description: "Here's a robot! 🤖",
+    draw(ctx, w, h) {
+      ctx.fillStyle = '#263238'; ctx.fillRect(0, 0, w, h);
+      const cx = w / 2, cy = h / 2;
+      // Head
+      ctx.fillStyle = '#b0bec5'; ctx.fillRect(cx - 70, cy - 100, 140, 120);
+      ctx.strokeStyle = '#78909c'; ctx.lineWidth = 3; ctx.strokeRect(cx - 70, cy - 100, 140, 120);
+      // Eyes
+      ctx.fillStyle = '#00e5ff'; ctx.fillRect(cx - 45, cy - 70, 30, 25);
+      ctx.fillRect(cx + 15, cy - 70, 30, 25);
+      // Mouth
+      ctx.fillStyle = '#455a64';
+      for (let i = 0; i < 5; i++) { ctx.fillRect(cx - 40 + i * 18, cy - 20, 12, 6); }
+      // Body
+      ctx.fillStyle = '#90a4ae'; ctx.fillRect(cx - 80, cy + 30, 160, 120);
+      // Antenna
+      ctx.strokeStyle = '#78909c'; ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.moveTo(cx, cy - 100); ctx.lineTo(cx, cy - 140); ctx.stroke();
+      ctx.beginPath(); ctx.arc(cx, cy - 145, 8, 0, Math.PI * 2);
+      ctx.fillStyle = '#ff1744'; ctx.fill();
+      // Arms
+      ctx.fillStyle = '#78909c';
+      ctx.fillRect(cx - 110, cy + 50, 30, 80);
+      ctx.fillRect(cx + 80, cy + 50, 30, 80);
+    }
+  },
+  {
+    triggers: [/aurora|northern\s*light/i],
+    description: "Here's an aurora borealis! 🌌",
+    draw(ctx, w, h) {
+      ctx.fillStyle = '#0a0a2e'; ctx.fillRect(0, 0, w, h);
+      // Stars
+      for (let i = 0; i < 150; i++) {
+        ctx.beginPath(); ctx.arc(Math.random() * w, Math.random() * h * 0.7, Math.random() * 1.5, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,255,255,${0.3 + Math.random() * 0.5})`; ctx.fill();
+      }
+      // Aurora bands
+      for (let band = 0; band < 5; band++) {
+        ctx.beginPath();
+        const baseY = h * 0.2 + band * 30;
+        ctx.moveTo(0, baseY);
+        for (let x = 0; x <= w; x += 5) {
+          ctx.lineTo(x, baseY + Math.sin(x * 0.01 + band * 2) * 40 + Math.sin(x * 0.03) * 20);
+        }
+        ctx.lineTo(w, baseY + 80); ctx.lineTo(0, baseY + 80); ctx.closePath();
+        const hue = 120 + band * 30;
+        ctx.fillStyle = `hsla(${hue}, 80%, 50%, 0.15)`;
+        ctx.fill();
+      }
+      // Hills
+      ctx.fillStyle = '#1a1a2e';
+      ctx.beginPath(); ctx.moveTo(0, h);
+      for (let x = 0; x <= w; x += 10) ctx.lineTo(x, h * 0.8 + Math.sin(x * 0.008) * 30);
+      ctx.lineTo(w, h); ctx.closePath(); ctx.fill();
+    }
+  },
+  {
+    triggers: [/diamond|gem|crystal/i],
+    description: "Here's a diamond! 💎",
+    draw(ctx, w, h) {
+      const bg = ctx.createLinearGradient(0, 0, 0, h);
+      bg.addColorStop(0, '#1a1a3e'); bg.addColorStop(1, '#0d0d2b');
+      ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
+      const cx = w / 2, cy = h / 2;
+      const pts = [[cx, cy - 120], [cx + 80, cy - 40], [cx + 60, cy + 80], [cx - 60, cy + 80], [cx - 80, cy - 40]];
+      // Diamond shape
+      ctx.beginPath(); pts.forEach((p, i) => i === 0 ? ctx.moveTo(...p) : ctx.lineTo(...p)); ctx.closePath();
+      const dGrad = ctx.createLinearGradient(cx - 80, cy - 120, cx + 80, cy + 80);
+      dGrad.addColorStop(0, '#b3e5fc'); dGrad.addColorStop(0.5, '#4fc3f7'); dGrad.addColorStop(1, '#0288d1');
+      ctx.fillStyle = dGrad; ctx.fill();
+      ctx.strokeStyle = '#81d4fa'; ctx.lineWidth = 2; ctx.stroke();
+      // Inner lines
+      ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(cx, cy - 120); ctx.lineTo(cx, cy + 80); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(pts[1][0], pts[1][1]); ctx.lineTo(pts[3][0], pts[3][1]); ctx.stroke();
+      // Sparkles
+      for (let i = 0; i < 20; i++) {
+        ctx.beginPath();
+        ctx.arc(cx + (Math.random() - 0.5) * 250, cy + (Math.random() - 0.5) * 300, Math.random() * 3, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(180,230,255,${Math.random() * 0.6})`; ctx.fill();
+      }
+    }
+  },
+  {
+    triggers: [/mandala|pattern/i],
+    description: "Here's a mandala pattern! 🕉️",
+    draw(ctx, w, h) {
+      ctx.fillStyle = '#1a1a2e'; ctx.fillRect(0, 0, w, h);
+      const cx = w / 2, cy = h / 2;
+      const colors = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff', '#5f27cd'];
+      for (let ring = 5; ring >= 1; ring--) {
+        const count = ring * 8;
+        for (let i = 0; i < count; i++) {
+          ctx.save(); ctx.translate(cx, cy);
+          ctx.rotate((i / count) * Math.PI * 2);
+          ctx.fillStyle = colors[(ring + i) % colors.length];
+          ctx.beginPath(); ctx.ellipse(0, -ring * 30, 8 + ring * 2, 20 + ring * 4, 0, 0, Math.PI * 2);
+          ctx.globalAlpha = 0.7; ctx.fill();
+          ctx.restore();
+        }
+      }
+      ctx.globalAlpha = 1;
+      ctx.beginPath(); ctx.arc(cx, cy, 15, 0, Math.PI * 2);
+      ctx.fillStyle = '#feca57'; ctx.fill();
+    }
+  },
+  {
+    triggers: [/cat|kitten/i],
+    description: "Here's a cute cat! 🐱",
+    draw(ctx, w, h) {
+      ctx.fillStyle = '#fff3e0'; ctx.fillRect(0, 0, w, h);
+      const cx = w / 2, cy = h / 2;
+      // Body
+      ctx.beginPath(); ctx.ellipse(cx, cy + 60, 80, 100, 0, 0, Math.PI * 2);
+      ctx.fillStyle = '#ff9800'; ctx.fill();
+      // Head
+      ctx.beginPath(); ctx.arc(cx, cy - 40, 70, 0, Math.PI * 2);
+      ctx.fillStyle = '#ff9800'; ctx.fill();
+      // Ears
+      ctx.fillStyle = '#ff9800';
+      ctx.beginPath(); ctx.moveTo(cx - 55, cy - 80); ctx.lineTo(cx - 30, cy - 130); ctx.lineTo(cx - 10, cy - 75); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(cx + 55, cy - 80); ctx.lineTo(cx + 30, cy - 130); ctx.lineTo(cx + 10, cy - 75); ctx.fill();
+      // Inner ears
+      ctx.fillStyle = '#ffccbc';
+      ctx.beginPath(); ctx.moveTo(cx - 45, cy - 85); ctx.lineTo(cx - 30, cy - 118); ctx.lineTo(cx - 15, cy - 80); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(cx + 45, cy - 85); ctx.lineTo(cx + 30, cy - 118); ctx.lineTo(cx + 15, cy - 80); ctx.fill();
+      // Eyes
+      ctx.fillStyle = '#4caf50'; ctx.beginPath(); ctx.ellipse(cx - 25, cy - 45, 15, 18, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#4caf50'; ctx.beginPath(); ctx.ellipse(cx + 25, cy - 45, 15, 18, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#111';
+      ctx.beginPath(); ctx.ellipse(cx - 25, cy - 45, 6, 16, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(cx + 25, cy - 45, 6, 16, 0, 0, Math.PI * 2); ctx.fill();
+      // Nose & mouth
+      ctx.fillStyle = '#e91e63';
+      ctx.beginPath(); ctx.moveTo(cx, cy - 18); ctx.lineTo(cx - 6, cy - 12); ctx.lineTo(cx + 6, cy - 12); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = '#5d4037'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(cx, cy - 12); ctx.lineTo(cx, cy - 4); ctx.stroke();
+      // Whiskers
+      ctx.strokeStyle = '#5d4037'; ctx.lineWidth = 1.5;
+      for (let side of [-1, 1]) {
+        for (let i = -1; i <= 1; i++) {
+          ctx.beginPath(); ctx.moveTo(cx + side * 15, cy - 10 + i * 8);
+          ctx.lineTo(cx + side * 70, cy - 15 + i * 12); ctx.stroke();
+        }
+      }
+    }
+  },
+  {
+    triggers: [/forest|woods/i],
+    description: "Here's a forest! 🌲",
+    draw(ctx, w, h) {
+      const bg = ctx.createLinearGradient(0, 0, 0, h);
+      bg.addColorStop(0, '#e8f5e9'); bg.addColorStop(1, '#c8e6c9');
+      ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#4caf50'; ctx.fillRect(0, h * 0.8, w, h * 0.2);
+      // Trees
+      const treeColors = ['#1b5e20', '#2e7d32', '#388e3c', '#43a047'];
+      for (let i = 0; i < 12; i++) {
+        const tx = 30 + Math.random() * (w - 60);
+        const th = 120 + Math.random() * 100;
+        const ty = h * 0.8 - th * 0.3;
+        // Trunk
+        ctx.fillStyle = '#4e342e'; ctx.fillRect(tx - 6, ty + th * 0.6, 12, th * 0.4);
+        // Layers
+        for (let l = 0; l < 3; l++) {
+          ctx.fillStyle = treeColors[Math.floor(Math.random() * treeColors.length)];
+          ctx.beginPath();
+          ctx.moveTo(tx - 30 - l * 5, ty + l * 35);
+          ctx.lineTo(tx, ty - 20 + l * 30);
+          ctx.lineTo(tx + 30 + l * 5, ty + l * 35);
+          ctx.closePath(); ctx.fill();
+        }
+      }
+    }
+  },
+  {
+    triggers: [/circle|bubble/i],
+    description: "Here's colorful circles! 🔵",
+    draw(ctx, w, h) {
+      ctx.fillStyle = '#fafafa'; ctx.fillRect(0, 0, w, h);
+      for (let i = 0; i < 30; i++) {
+        ctx.beginPath();
+        ctx.arc(Math.random() * w, Math.random() * h, 20 + Math.random() * 60, 0, Math.PI * 2);
+        ctx.fillStyle = `hsla(${Math.random() * 360}, 70%, 60%, 0.5)`;
+        ctx.fill();
+        ctx.strokeStyle = `hsla(${Math.random() * 360}, 70%, 40%, 0.3)`;
+        ctx.lineWidth = 2; ctx.stroke();
+      }
+    }
+  },
+  {
+    triggers: [/emoji|face/i],
+    description: "Here's some emojis! 😎",
+    draw(ctx, w, h) {
+      ctx.fillStyle = '#f5f5f5'; ctx.fillRect(0, 0, w, h);
+      const emojis = ['😊', '😎', '🥳', '😍', '🤩', '😜', '🤗', '😇', '🥰', '😺'];
+      ctx.font = '60px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      const cols = 4, rows = 3;
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const x = (c + 0.5) * (w / cols);
+          const y = (r + 0.5) * (h / rows) + 20;
+          ctx.fillText(emojis[(r * cols + c) % emojis.length], x, y);
+        }
+      }
+    }
+  },
+  {
+    triggers: [/moon|crescent/i],
+    description: "Here's a moon! 🌙",
+    draw(ctx, w, h) {
+      ctx.fillStyle = '#0a0a2e'; ctx.fillRect(0, 0, w, h);
+      // Stars
+      for (let i = 0; i < 200; i++) {
+        ctx.beginPath(); ctx.arc(Math.random() * w, Math.random() * h, Math.random() * 1.5, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,255,255,${0.2 + Math.random() * 0.6})`; ctx.fill();
+      }
+      const cx = w / 2, cy = h / 2;
+      // Moon glow
+      const glow = ctx.createRadialGradient(cx, cy, 60, cx, cy, 200);
+      glow.addColorStop(0, 'rgba(255,255,200,0.15)'); glow.addColorStop(1, 'transparent');
+      ctx.fillStyle = glow; ctx.fillRect(0, 0, w, h);
+      // Moon
+      ctx.beginPath(); ctx.arc(cx, cy, 80, 0, Math.PI * 2);
+      ctx.fillStyle = '#fdd835'; ctx.fill();
+      // Crescent cut
+      ctx.beginPath(); ctx.arc(cx + 30, cy - 10, 70, 0, Math.PI * 2);
+      ctx.fillStyle = '#0a0a2e'; ctx.fill();
+    }
+  },
+];
+
+function findArtTemplate(prompt) {
+  const p = prompt.toLowerCase();
+  for (const template of artTemplates) {
+    for (const trigger of template.triggers) {
+      if (trigger.test(p)) return template;
+    }
+  }
+  return null;
+}
+
+function addArtChatMessage(text, isUser) {
+  const msgDiv = document.createElement('div');
+  msgDiv.className = `chat-msg ${isUser ? 'user-msg' : 'bot-msg'}`;
+  msgDiv.innerHTML = `
+    <div class="chat-avatar">${isUser ? '👤' : '🎨'}</div>
+    <div class="chat-bubble">${text}</div>
+  `;
+  artChatMessages.appendChild(msgDiv);
+  artChatMessages.scrollTop = artChatMessages.scrollHeight;
+}
+
+function addArtTypingIndicator() {
+  const typing = document.createElement('div');
+  typing.className = 'chat-msg bot-msg';
+  typing.id = 'art-typing-indicator';
+  typing.innerHTML = `
+    <div class="chat-avatar">🎨</div>
+    <div class="chat-bubble">
+      <div class="typing-dots"><span></span><span></span><span></span></div>
+    </div>
+  `;
+  artChatMessages.appendChild(typing);
+  artChatMessages.scrollTop = artChatMessages.scrollHeight;
+}
+
+function removeArtTypingIndicator() {
+  const indicator = document.getElementById('art-typing-indicator');
+  if (indicator) indicator.remove();
+}
+
+function addArtBotResponse(description, canvas) {
+  const msgDiv = document.createElement('div');
+  msgDiv.className = 'chat-msg bot-msg';
+  const imgData = canvas.toDataURL('image/png');
+  msgDiv.innerHTML = `
+    <div class="chat-avatar">🎨</div>
+    <div class="chat-bubble">
+      ${description}
+      <br><img src="${imgData}" class="chat-image-preview" alt="Generated art">
+      <br><button class="art-download-btn" onclick="downloadArtImage()">💾 Save Image</button>
+    </div>
+  `;
+  artChatMessages.appendChild(msgDiv);
+  artChatMessages.scrollTop = artChatMessages.scrollHeight;
+}
+
+function downloadArtImage() {
+  const link = document.createElement('a');
+  link.download = 'nova-art-' + Date.now() + '.png';
+  link.href = artCanvas.toDataURL('image/png');
+  link.click();
+}
+window.downloadArtImage = downloadArtImage;
+
+function handleArtSend() {
+  const prompt = artChatInput.value.trim();
+  if (!prompt) return;
+
+  addArtChatMessage(prompt, true);
+  artChatInput.value = '';
+  addArtTypingIndicator();
+
+  setTimeout(() => {
+    removeArtTypingIndicator();
+
+    if (/^(help|list|templates)$/i.test(prompt)) {
+      addArtChatMessage(
+        "🎨 <b>I can draw these for you:</b><br><br>" +
+        "🌅 <b>Nature:</b> sunset, mountains, ocean, forest, rainbow, tree, aurora, moon<br>" +
+        "✨ <b>Space:</b> stars, galaxy, night sky, fireworks<br>" +
+        "😊 <b>Faces:</b> smiley face, robot, cat, emoji<br>" +
+        "🏙️ <b>Scenes:</b> city skyline, house<br>" +
+        "🎨 <b>Patterns:</b> gradient, checkerboard, polka dots, stripes, spiral, mandala<br>" +
+        "💎 <b>Objects:</b> heart, flower, snowflake, diamond, circles<br><br>" +
+        "Just type what you want to see!",
+        false
+      );
+      return;
+    }
+
+    const template = findArtTemplate(prompt);
+    if (template) {
+      artCanvas.classList.add('active');
+      artPlaceholder.classList.add('hidden');
+      artCtx.clearRect(0, 0, artCanvas.width, artCanvas.height);
+      template.draw(artCtx, artCanvas.width, artCanvas.height);
+      addArtBotResponse(template.description, artCanvas);
+    } else {
+      addArtChatMessage(
+        "I'm not sure how to draw that yet! Try asking for:<br><br>" +
+        "🌅 sunset, mountains, ocean, forest<br>" +
+        "😊 smiley face, heart, flower, cat<br>" +
+        "🏙️ city skyline, robot, snowflake<br>" +
+        "🎨 gradient, checkerboard, mandala<br><br>" +
+        "Type <b>help</b> for a full list!",
+        false
+      );
+    }
+  }, 1000);
+}
+
+artChatSend.addEventListener('click', handleArtSend);
+artChatInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') handleArtSend();
+});
+
+downloadArtBtn.addEventListener('click', () => {
+  if (artCanvas.classList.contains('active')) {
+    downloadArtImage();
+  }
+});
+
+clearArtBtn.addEventListener('click', () => {
+  artCtx.clearRect(0, 0, artCanvas.width, artCanvas.height);
+  artCanvas.classList.remove('active');
+  artPlaceholder.classList.remove('hidden');
+});

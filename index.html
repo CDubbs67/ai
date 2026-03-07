@@ -132,6 +132,9 @@
                     <button class="mode-btn" id="mode-coding" data-mode="coding">
                         <span class="mode-icon">💻</span> Coding
                     </button>
+                    <button class="mode-btn" id="mode-art" data-mode="art">
+                        <span class="mode-icon">🎨</span> Art
+                    </button>
                 </div>
                 <div class="suggestions" id="suggestions">
                     <span class="suggestion-label">Try saying:</span>
@@ -208,6 +211,58 @@ console.log('Hello, World!');"></textarea>
                     <input type="text" id="code-chat-input" class="code-chat-input"
                         placeholder="Describe what you want to code..." autocomplete="off" />
                     <button class="code-chat-send" id="code-chat-send">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="18"
+                            height="18">
+                            <path d="M5 12h14M12 5l7 7-7 7" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section class="art-section" id="art-section">
+            <div class="art-canvas-card">
+                <div class="art-canvas-header">
+                    <div class="art-canvas-title">
+                        <span class="art-canvas-icon">🖼️</span>
+                        <span>Generated Image</span>
+                    </div>
+                    <div class="art-canvas-actions">
+                        <button class="code-btn code-btn-run" id="download-art-btn">💾 Download</button>
+                        <button class="code-btn code-btn-clear" id="clear-art-btn">🗑️ Clear</button>
+                    </div>
+                </div>
+                <div class="art-canvas-body">
+                    <canvas id="art-canvas" width="512" height="512"></canvas>
+                    <span class="art-canvas-placeholder" id="art-placeholder">Describe an image and I'll draw it for
+                        you! ✨</span>
+                </div>
+            </div>
+
+            <div class="art-chat-card">
+                <div class="code-chat-header">
+                    <div class="code-chat-title">
+                        <span class="code-chat-icon">🎨</span>
+                        <span>Nova Art Studio</span>
+                    </div>
+                    <span class="code-chat-hint">Describe what you want to see!</span>
+                </div>
+                <div class="code-chat-messages" id="art-chat-messages">
+                    <div class="chat-msg bot-msg">
+                        <div class="chat-avatar">🎨</div>
+                        <div class="chat-bubble">Welcome to Art Studio! Tell me what to draw and I'll
+                            create it for you! Try things like:<br><br>
+                            • "draw a sunset"<br>
+                            • "make a smiley face"<br>
+                            • "create a galaxy"<br>
+                            • "draw a flower"
+                        </div>
+                    </div>
+                </div>
+                <div class="code-chat-input-area">
+                    <input type="text" id="art-chat-input" class="code-chat-input"
+                        placeholder="Describe what you want to see..." autocomplete="off" />
+                    <button class="code-chat-send" id="art-chat-send">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="18"
                             height="18">
                             <path d="M5 12h14M12 5l7 7-7 7" />
