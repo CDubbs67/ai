@@ -3704,6 +3704,13 @@ let recordedChunks = [];
 let audioStreamDest = null;
 let isRecording = false;
 
+// Library UI Elements
+const musicLibraryCard = document.getElementById('music-library-card');
+const musicLibraryList = document.getElementById('music-library-list');
+const libraryCountLabel = document.getElementById('library-count');
+let libraryRecordings = [];
+
+
 function getAudioCtx() {
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -4248,11 +4255,11 @@ pianoKeyboard.addEventListener('mousedown', (e) => {
     const freq = NOTE_FREQS[note];
     if (freq) {
       const ctx = getAudioCtx();
-      ensureAudioNodes(); // Use ensureAudioNodes
+      ensureAudioNodes();
       playNote(ctx, freq, 0, 0.4, 'triangle', 0.15);
       startVisualizer();
       e.target.classList.add('active');
-      setTimeout(() => e.classList.remove('active'), 150);
+      setTimeout(() => e.target.classList.remove('active'), 150);
     }
   }
 });
@@ -4308,17 +4315,7 @@ function startRecording() {
     };
     mediaRecorder.onstop = () => {
       const blob = new Blob(recordedChunks, { type: 'audio/webm' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.style.display = 'none';
-      a.href = url;
-      a.download = `AskNova_Music_${new Date().getTime()}.webm`;
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(() => {
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
-      }, 100);
+      addRecordingToLibrary(blob);
       recordedChunks = [];
     };
 
@@ -4331,6 +4328,76 @@ function startRecording() {
     addMusicChatMessage("❌ Error creating recorder. Your browser might not support recording.", false);
   }
 }
+
+function addRecordingToLibrary(blob) {
+  const timestamp = new Date().getTime();
+  const dateStr = new Date().toLocaleString();
+  const id = `rec_${timestamp}`;
+  const name = `Recording_${timestamp % 10000}`;
+  const url = URL.createObjectURL(blob);
+
+  libraryRecordings.push({ id, name, date: dateStr, url, blob });
+  updateLibraryUI();
+
+  // Show library if it was hidden
+  if (musicLibraryCard) musicLibraryCard.style.display = 'block';
+  addMusicChatMessage(`✅ New recording saved to library: <b>${name}</b>`, false);
+}
+
+function updateLibraryUI() {
+  if (!musicLibraryList) return;
+  musicLibraryList.innerHTML = '';
+  if (libraryCountLabel) {
+    libraryCountLabel.textContent = `${libraryRecordings.length} recording${libraryRecordings.length === 1 ? '' : 's'}`;
+  }
+
+  if (libraryRecordings.length === 0) {
+    if (musicLibraryCard) musicLibraryCard.style.display = 'none';
+    return;
+  }
+
+  libraryRecordings.forEach(rec => {
+    const item = document.createElement('div');
+    item.className = 'music-library-item';
+    item.innerHTML = `
+      <div class="library-item-info">
+        <span class="library-item-name">${rec.name}</span>
+        <span class="library-item-date">${rec.date}</span>
+      </div>
+      <div class="library-item-actions">
+        <button class="library-btn library-btn-download" onclick="downloadRecording('${rec.id}')">
+          <span>⏬ Download</span>
+        </button>
+        <button class="library-btn library-btn-delete" onclick="deleteRecording('${rec.id}')">
+          <span>🗑️</span>
+        </button>
+      </div>
+    `;
+    musicLibraryList.appendChild(item);
+  });
+}
+
+window.downloadRecording = (id) => {
+  const rec = libraryRecordings.find(r => r.id === id);
+  if (rec) {
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = rec.url;
+    a.download = `${rec.name}.webm`;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => document.body.removeChild(a), 100);
+  }
+};
+
+window.deleteRecording = (id) => {
+  const index = libraryRecordings.findIndex(r => r.id === id);
+  if (index !== -1) {
+    URL.revokeObjectURL(libraryRecordings[index].url);
+    libraryRecordings.splice(index, 1);
+    updateLibraryUI();
+  }
+};
 
 function stopRecording() {
   if (mediaRecorder && mediaRecorder.state !== 'inactive') {
@@ -4349,22 +4416,6 @@ musicRecordBtn.addEventListener('click', () => {
     // Hint message
     if (recordedChunks.length === 0) {
       addMusicChatMessage("🔴 <b>Recording started!</b> Please play some music using the tools above or ask the bot to play.", false);
-    }
-  }
-});
-
-// Update manual node creations to use ensureAudioNodes
-pianoKeyboard.addEventListener('mousedown', (e) => {
-  if (e.target.classList.contains('piano-key')) {
-    const note = e.target.dataset.note;
-    const freq = NOTE_FREQS[note];
-    if (freq) {
-      const ctx = getAudioCtx();
-      ensureAudioNodes();
-      playNote(ctx, freq, 0, 0.4, 'triangle', 0.15);
-      startVisualizer();
-      e.target.classList.add('active');
-      setTimeout(() => e.target.classList.remove('active'), 150);
     }
   }
 });
