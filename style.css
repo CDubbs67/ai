@@ -1567,3 +1567,254 @@ body.theme-rose {
 #art-canvas.erasing {
   cursor: cell;
 }
+
+/* ===== Music Section ===== */
+.music-section {
+  display: none;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 20px 40px;
+  animation: fadeInUp 0.5s ease;
+}
+
+.music-section.visible {
+  display: block;
+}
+
+.music-player-card {
+  background: var(--surface);
+  border: 1px solid var(--border-bright);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.music-player-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid var(--border);
+}
+
+.music-player-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text);
+}
+
+.music-player-icon {
+  font-size: 1.2rem;
+}
+
+.music-player-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.music-visualizer-body {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  background: #0d0d14;
+}
+
+#music-visualizer {
+  width: 100%;
+  height: 200px;
+  display: none;
+}
+
+#music-visualizer.active {
+  display: block;
+}
+
+.music-placeholder {
+  color: var(--text-dim);
+  font-style: italic;
+  font-size: 0.95rem;
+  padding: 40px;
+  text-align: center;
+  position: absolute;
+}
+
+.music-placeholder.hidden {
+  display: none;
+}
+
+.music-info {
+  padding: 10px 20px;
+  border-top: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.music-track-name {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.music-chat-card {
+  background: var(--surface);
+  border: 1px solid var(--border-bright);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  margin-top: 16px;
+}
+
+/* Music Editor Styles */
+.music-editor-card {
+  background: var(--surface);
+  border: 1px solid var(--border-bright);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  margin-top: 16px;
+  padding: 20px;
+}
+
+.music-editor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.music-editor-hint {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  font-weight: normal;
+}
+
+/* Piano Keyboard */
+.piano-keyboard {
+  display: flex;
+  height: 120px;
+  background: #000;
+  padding: 2px;
+  border-radius: 4px;
+  position: relative;
+  overflow-x: auto;
+  user-select: none;
+}
+
+.piano-key {
+  position: relative;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.piano-key.white {
+  flex: 1;
+  min-width: 30px;
+  background: white;
+  border: 1px solid #ccc;
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
+  z-index: 1;
+}
+
+.piano-key.white:active,
+.piano-key.white.active {
+  background: #e0e0e0;
+}
+
+.piano-key.black {
+  width: 20px;
+  height: 70px;
+  background: #333;
+  margin-left: -10px;
+  margin-right: -10px;
+  z-index: 2;
+  border-bottom-left-radius: 3px;
+  border-bottom-right-radius: 3px;
+}
+
+.piano-key.black:active,
+.piano-key.black.active {
+  background: #555;
+}
+
+/* Step Sequencer */
+.sequencer-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bpm-label {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+#seq-bpm {
+  width: 50px;
+  background: var(--background);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 2px 5px;
+  border-radius: 4px;
+}
+
+.sequencer-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sequencer-row {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.seq-label {
+  width: 80px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.seq-steps {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+}
+
+.seq-step {
+  height: 30px;
+  flex: 1;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.seq-step:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.seq-step.active {
+  background: var(--primary);
+  box-shadow: 0 0 10px var(--primary-glow);
+  border-color: var(--primary-glow);
+}
+
+.seq-step.current {
+  border-color: white;
+  transform: scale(1.05);
+  box-shadow: inset 0 0 5px white;
+}

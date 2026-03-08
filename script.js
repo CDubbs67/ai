@@ -1369,14 +1369,16 @@ function renderHistory() {
 
 
 // ===== Mode Toggle =====
-let currentMode = 'conversation'; // 'conversation', 'research', 'coding', or 'art'
+let currentMode = 'conversation'; // 'conversation', 'research', 'coding', 'art', or 'music'
 const modeConversationBtn = document.getElementById('mode-conversation');
 const modeResearchBtn = document.getElementById('mode-research');
 const modeCodingBtn = document.getElementById('mode-coding');
 const modeArtBtn = document.getElementById('mode-art');
+const modeMusicBtn = document.getElementById('mode-music');
 const suggestionsContainer = document.getElementById('suggestions');
 const codingSection = document.getElementById('coding-section');
 const artSection = document.getElementById('art-section');
+const musicSection = document.getElementById('music-section');
 
 const conversationSuggestions = [
   { label: 'Hi! 👋', query: 'Hi!' },
@@ -1408,12 +1410,14 @@ function setMode(mode) {
   modeResearchBtn.classList.toggle('active', mode === 'research');
   modeCodingBtn.classList.toggle('active', mode === 'coding');
   modeArtBtn.classList.toggle('active', mode === 'art');
+  modeMusicBtn.classList.toggle('active', mode === 'music');
 
-  // Hide both special sections by default
+  // Hide all special sections by default
   codingSection.classList.remove('visible');
   artSection.classList.remove('visible');
+  musicSection.classList.remove('visible');
 
-  if (mode === 'coding' || mode === 'art') {
+  if (mode === 'coding' || mode === 'art' || mode === 'music') {
     // Hide search-related UI
     document.getElementById('search-bar').style.display = 'none';
     suggestionsContainer.style.display = 'none';
@@ -1423,10 +1427,11 @@ function setMode(mode) {
 
     if (mode === 'coding') codingSection.classList.add('visible');
     if (mode === 'art') artSection.classList.add('visible');
+    if (mode === 'music') musicSection.classList.add('visible');
     return;
   }
 
-  // Not coding/art mode — restore search UI
+  // Not coding/art/music mode — restore search UI
   document.getElementById('search-bar').style.display = '';
   suggestionsContainer.style.display = '';
   hero.classList.remove('compact');
@@ -1458,6 +1463,7 @@ modeConversationBtn.addEventListener('click', () => setMode('conversation'));
 modeResearchBtn.addEventListener('click', () => setMode('research'));
 modeCodingBtn.addEventListener('click', () => setMode('coding'));
 modeArtBtn.addEventListener('click', () => setMode('art'));
+modeMusicBtn.addEventListener('click', () => setMode('music'));
 
 // ===== Code Execution =====
 const codeInput = document.getElementById('code-input');
@@ -3673,3 +3679,604 @@ const extraArtTemplates = [
 
 // Merge extra art templates
 artTemplates.push(...extraArtTemplates);
+
+// ===== Music Studio Engine =====
+const musicVisualizer = document.getElementById('music-visualizer');
+const musicVisCtx = musicVisualizer.getContext('2d');
+const musicPlaceholder = document.getElementById('music-placeholder');
+const musicChatMessages = document.getElementById('music-chat-messages');
+const musicChatInput = document.getElementById('music-chat-input');
+const musicChatSend = document.getElementById('music-chat-send');
+const musicPlayBtn = document.getElementById('music-play-btn');
+const musicStopBtn = document.getElementById('music-stop-btn');
+const musicTrackName = document.getElementById('music-track-name');
+
+let audioCtx = null;
+let currentNodes = [];
+let visualizerAnimId = null;
+let analyserNode = null;
+let currentMusicTemplate = null;
+
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+
+function stopAllMusic() {
+  currentNodes.forEach(node => {
+    try { node.stop(); } catch (e) { }
+    try { node.disconnect(); } catch (e) { }
+  });
+  currentNodes = [];
+  if (visualizerAnimId) { cancelAnimationFrame(visualizerAnimId); visualizerAnimId = null; }
+}
+
+function playNote(ctx, freq, start, duration, type = 'sine', volume = 0.15, dest = null) {
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = type;
+  osc.frequency.value = freq;
+  gain.gain.setValueAtTime(volume, ctx.currentTime + start);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + duration);
+  osc.connect(gain);
+  gain.connect(dest || analyserNode);
+  osc.start(ctx.currentTime + start);
+  osc.stop(ctx.currentTime + start + duration + 0.1);
+  currentNodes.push(osc);
+  return osc;
+}
+
+function playDrum(ctx, freq, start, duration = 0.15) {
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = 'triangle';
+  osc.frequency.setValueAtTime(freq, ctx.currentTime + start);
+  osc.frequency.exponentialRampToValueAtTime(1, ctx.currentTime + start + duration);
+  gain.gain.setValueAtTime(0.5, ctx.currentTime + start);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + duration);
+  osc.connect(gain);
+  gain.connect(analyserNode);
+  osc.start(ctx.currentTime + start);
+  osc.stop(ctx.currentTime + start + duration + 0.05);
+  currentNodes.push(osc);
+}
+
+function playNoise(ctx, start, duration, volume = 0.08) {
+  const bufferSize = ctx.sampleRate * duration;
+  const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1) * volume;
+  const source = ctx.createBufferSource();
+  const gain = ctx.createGain();
+  source.buffer = buffer;
+  gain.gain.setValueAtTime(volume, ctx.currentTime + start);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + duration);
+  source.connect(gain);
+  gain.connect(analyserNode);
+  source.start(ctx.currentTime + start);
+  source.stop(ctx.currentTime + start + duration);
+  currentNodes.push(source);
+}
+
+function startVisualizer() {
+  if (!analyserNode) return;
+  musicVisualizer.classList.add('active');
+  musicPlaceholder.classList.add('hidden');
+  const bufferLength = analyserNode.frequencyBinCount;
+  const dataArray = new Uint8Array(bufferLength);
+
+  function draw() {
+    visualizerAnimId = requestAnimationFrame(draw);
+    analyserNode.getByteFrequencyData(dataArray);
+    const w = musicVisualizer.width, h = musicVisualizer.height;
+    musicVisCtx.fillStyle = '#0d0d14';
+    musicVisCtx.fillRect(0, 0, w, h);
+
+    const barCount = 64;
+    const barWidth = w / barCount - 2;
+    const colors = ['#8b5cf6', '#a855f7', '#c084fc', '#d8b4fe', '#7c3aed', '#6d28d9'];
+    for (let i = 0; i < barCount; i++) {
+      const idx = Math.floor(i * bufferLength / barCount);
+      const barHeight = (dataArray[idx] / 255) * h * 0.85;
+      const x = i * (barWidth + 2) + 1;
+      const gradient = musicVisCtx.createLinearGradient(x, h, x, h - barHeight);
+      gradient.addColorStop(0, colors[i % colors.length]);
+      gradient.addColorStop(1, 'rgba(139,92,246,0.2)');
+      musicVisCtx.fillStyle = gradient;
+      musicVisCtx.fillRect(x, h - barHeight, barWidth, barHeight);
+    }
+  }
+  draw();
+}
+
+// Note frequency helpers
+const NOTE_FREQS = {
+  C3: 130.81, D3: 146.83, E3: 164.81, F3: 174.61, G3: 196, A3: 220, B3: 246.94,
+  C4: 261.63, D4: 293.66, E4: 329.63, F4: 349.23, G4: 392, A4: 440, B4: 493.88,
+  C5: 523.25, D5: 587.33, E5: 659.25, F5: 698.46, G5: 783.99, A5: 880, B5: 987.77,
+  C6: 1046.5,
+  'C#4': 277.18, 'D#4': 311.13, 'F#4': 369.99, 'G#4': 415.30, 'A#4': 466.16,
+  'C#5': 554.37, 'D#5': 622.25, 'F#5': 739.99, 'G#5': 830.61, 'A#5': 932.33,
+};
+
+const musicTemplates = [
+  {
+    triggers: [/happy|cheerful|upbeat|joyful/i],
+    name: '🎶 Happy Tune',
+    play(ctx) {
+      const notes = ['C4', 'E4', 'G4', 'C5', 'G4', 'E4', 'C4', 'D4', 'F4', 'A4', 'D5', 'A4', 'F4', 'D4', 'E4', 'G4', 'B4', 'E5'];
+      notes.forEach((n, i) => playNote(ctx, NOTE_FREQS[n], i * 0.2, 0.25, 'triangle', 0.12));
+    }
+  },
+  {
+    triggers: [/sad|melancholy|blue|gloomy/i],
+    name: '😢 Sad Melody',
+    play(ctx) {
+      const notes = ['A3', 'C4', 'E4', 'A4', 'G4', 'E4', 'D4', 'C4', 'A3', 'G3', 'A3'];
+      notes.forEach((n, i) => playNote(ctx, NOTE_FREQS[n], i * 0.4, 0.5, 'sine', 0.1));
+    }
+  },
+  {
+    triggers: [/lullaby|sleep|calm|peaceful|relaxing/i],
+    name: '🌙 Lullaby',
+    play(ctx) {
+      const notes = ['C4', 'E4', 'G4', 'E4', 'C4', 'D4', 'F4', 'D4', 'C4', 'E4', 'G4', 'C5', 'G4', 'E4', 'C4'];
+      notes.forEach((n, i) => playNote(ctx, NOTE_FREQS[n], i * 0.5, 0.6, 'sine', 0.08));
+    }
+  },
+  {
+    triggers: [/epic|heroic|battle|adventure/i],
+    name: '⚔️ Epic Theme',
+    play(ctx) {
+      const notes = ['C4', 'C4', 'G4', 'G4', 'A4', 'A4', 'G4', 'F4', 'F4', 'E4', 'E4', 'D4', 'D4', 'C4'];
+      notes.forEach((n, i) => playNote(ctx, NOTE_FREQS[n], i * 0.25, 0.3, 'sawtooth', 0.08));
+      // Power chords
+      [0, 1.75, 3.5].forEach(t => {
+        playNote(ctx, NOTE_FREQS.C3, t, 0.5, 'square', 0.05);
+        playNote(ctx, NOTE_FREQS.G3, t, 0.5, 'square', 0.05);
+      });
+    }
+  },
+  {
+    triggers: [/jazz|swing/i],
+    name: '🎷 Jazz Riff',
+    play(ctx) {
+      const notes = ['C4', 'D#4', 'F4', 'F#4', 'G4', 'A#4', 'C5', 'A#4', 'G4', 'F#4', 'F4', 'D#4', 'C4'];
+      notes.forEach((n, i) => playNote(ctx, NOTE_FREQS[n], i * 0.22, 0.28, 'triangle', 0.1));
+    }
+  },
+  {
+    triggers: [/drum|beat|rhythm/i],
+    name: '🥁 Drum Beat',
+    play(ctx) {
+      for (let bar = 0; bar < 4; bar++) {
+        const t = bar * 1;
+        playDrum(ctx, 150, t, 0.2);       // Kick
+        playDrum(ctx, 150, t + 0.5, 0.2);   // Kick
+        playNoise(ctx, t + 0.25, 0.1, 0.15); // Snare
+        playNoise(ctx, t + 0.75, 0.1, 0.15); // Snare
+        for (let h = 0; h < 8; h++) playNoise(ctx, t + h * 0.125, 0.05, 0.03); // Hi-hat
+      }
+    }
+  },
+  {
+    triggers: [/techno|electronic|edm|dance/i],
+    name: '🎛️ Techno Beat',
+    play(ctx) {
+      for (let bar = 0; bar < 4; bar++) {
+        const t = bar * 1;
+        for (let b = 0; b < 4; b++) {
+          playDrum(ctx, 80, t + b * 0.25, 0.15); // Four on the floor
+          if (b % 2 === 1) playNoise(ctx, t + b * 0.25, 0.08, 0.12);
+        }
+        playNote(ctx, NOTE_FREQS.C3, t, 0.2, 'sawtooth', 0.06);
+        playNote(ctx, NOTE_FREQS.C3, t + 0.5, 0.2, 'sawtooth', 0.06);
+      }
+    }
+  },
+  {
+    triggers: [/hip\s*hop|rap|trap/i],
+    name: '🎤 Hip Hop Beat',
+    play(ctx) {
+      for (let bar = 0; bar < 4; bar++) {
+        const t = bar * 1;
+        playDrum(ctx, 60, t, 0.25);
+        playDrum(ctx, 60, t + 0.375, 0.2);
+        playNoise(ctx, t + 0.25, 0.12, 0.2);
+        playNoise(ctx, t + 0.75, 0.12, 0.2);
+        for (let h = 0; h < 4; h++) playNoise(ctx, t + h * 0.25, 0.04, 0.02);
+      }
+      // Bass
+      ['C3', 'C3', 'D#3', 'C3'].forEach((n, i) => playNote(ctx, NOTE_FREQS[n] || 130, i * 1, 0.4, 'sine', 0.1));
+    }
+  },
+  {
+    triggers: [/piano|keyboard/i],
+    name: '🎹 Piano Melody',
+    play(ctx) {
+      const notes = ['C4', 'E4', 'G4', 'C5', 'B4', 'G4', 'E4', 'C4', 'F4', 'A4', 'C5', 'F5', 'E5', 'C5', 'A4', 'F4'];
+      notes.forEach((n, i) => playNote(ctx, NOTE_FREQS[n], i * 0.3, 0.35, 'triangle', 0.1));
+    }
+  },
+  {
+    triggers: [/guitar|strum/i],
+    name: '🎸 Guitar Strum',
+    play(ctx) {
+      const chords = [
+        [261.63, 329.63, 392, 523.25], // C
+        [293.66, 369.99, 440, 587.33], // D
+        [220, 277.18, 329.63, 440],    // Am
+        [196, 246.94, 293.66, 392],    // G
+      ];
+      chords.forEach((chord, i) => {
+        chord.forEach((f, j) => {
+          playNote(ctx, f, i * 0.8 + j * 0.03, 0.7, 'triangle', 0.06);
+        });
+      });
+    }
+  },
+  {
+    triggers: [/synth|synthesizer|pad/i],
+    name: '🎹 Synth Pad',
+    play(ctx) {
+      const chords = [[261.63, 329.63, 392], [349.23, 440, 523.25], [293.66, 369.99, 440], [261.63, 329.63, 392]];
+      chords.forEach((chord, i) => {
+        chord.forEach(f => {
+          playNote(ctx, f, i * 1.2, 1.3, 'sawtooth', 0.04);
+          playNote(ctx, f * 1.005, i * 1.2, 1.3, 'sawtooth', 0.04); // Detune for richness
+        });
+      });
+    }
+  },
+  {
+    triggers: [/bell|chime|xylophone/i],
+    name: '🔔 Bell Chime',
+    play(ctx) {
+      const notes = ['C5', 'E5', 'G5', 'C6', 'G5', 'E5', 'C5', 'D5', 'F5', 'A5', 'D5'];
+      notes.forEach((n, i) => playNote(ctx, NOTE_FREQS[n], i * 0.35, 0.5, 'sine', 0.08));
+    }
+  },
+  {
+    triggers: [/rain|rainfall/i],
+    name: '🌧️ Rain Sounds',
+    play(ctx) {
+      for (let i = 0; i < 40; i++) {
+        const start = Math.random() * 4;
+        playNoise(ctx, start, 0.05 + Math.random() * 0.1, 0.02 + Math.random() * 0.04);
+      }
+      // Continuous background
+      playNoise(ctx, 0, 5, 0.03);
+    }
+  },
+  {
+    triggers: [/ocean\s*wave|sea\s*sound|shore/i],
+    name: '🌊 Ocean Waves',
+    play(ctx) {
+      for (let w = 0; w < 4; w++) {
+        const t = w * 1.5;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine'; osc.frequency.value = 80 + Math.random() * 40;
+        gain.gain.setValueAtTime(0.001, ctx.currentTime + t);
+        gain.gain.linearRampToValueAtTime(0.06, ctx.currentTime + t + 0.7);
+        gain.gain.linearRampToValueAtTime(0.001, ctx.currentTime + t + 1.4);
+        osc.connect(gain); gain.connect(analyserNode);
+        osc.start(ctx.currentTime + t); osc.stop(ctx.currentTime + t + 1.5);
+        currentNodes.push(osc);
+        playNoise(ctx, t + 0.3, 1, 0.04);
+      }
+    }
+  },
+  {
+    triggers: [/wind|breeze/i],
+    name: '💨 Wind',
+    play(ctx) {
+      for (let i = 0; i < 6; i++) {
+        const t = i * 0.8;
+        playNoise(ctx, t, 1 + Math.random(), 0.03 + Math.random() * 0.03);
+      }
+    }
+  },
+  {
+    triggers: [/thunder|storm\s*sound/i],
+    name: '⛈️ Thunder',
+    play(ctx) {
+      // Rain background
+      playNoise(ctx, 0, 5, 0.04);
+      // Thunder rumbles
+      [0.5, 2, 3.5].forEach(t => {
+        playDrum(ctx, 40, t, 0.8);
+        playNoise(ctx, t, 0.5, 0.15);
+      });
+    }
+  },
+  {
+    triggers: [/bird\s*song|bird\s*sound|chirp/i],
+    name: '🐦 Bird Song',
+    play(ctx) {
+      for (let b = 0; b < 6; b++) {
+        const t = b * 0.7;
+        playNote(ctx, 1200 + Math.random() * 800, t, 0.08, 'sine', 0.06);
+        playNote(ctx, 1500 + Math.random() * 600, t + 0.1, 0.06, 'sine', 0.05);
+        playNote(ctx, 1000 + Math.random() * 1000, t + 0.2, 0.1, 'sine', 0.05);
+      }
+    }
+  },
+  {
+    triggers: [/major\s*scale/i],
+    name: '🎼 Major Scale',
+    play(ctx) {
+      ['C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C5', 'B4', 'A4', 'G4', 'F4', 'E4', 'D4', 'C4'].forEach((n, i) =>
+        playNote(ctx, NOTE_FREQS[n], i * 0.3, 0.35, 'triangle', 0.1));
+    }
+  },
+  {
+    triggers: [/minor\s*scale/i],
+    name: '🎼 Minor Scale',
+    play(ctx) {
+      const freqs = [220, 246.94, 261.63, 293.66, 329.63, 349.23, 392, 440, 392, 349.23, 329.63, 293.66, 261.63, 246.94, 220];
+      freqs.forEach((f, i) => playNote(ctx, f, i * 0.3, 0.35, 'triangle', 0.1));
+    }
+  },
+  {
+    triggers: [/pentatonic/i],
+    name: '🎼 Pentatonic Scale',
+    play(ctx) {
+      const freqs = [261.63, 293.66, 329.63, 392, 440, 523.25, 440, 392, 329.63, 293.66, 261.63];
+      freqs.forEach((f, i) => playNote(ctx, f, i * 0.3, 0.35, 'sine', 0.1));
+    }
+  },
+  {
+    triggers: [/alarm|siren|alert/i],
+    name: '🚨 Siren',
+    play(ctx) {
+      for (let i = 0; i < 6; i++) {
+        playNote(ctx, 600, i * 0.5, 0.25, 'square', 0.06);
+        playNote(ctx, 900, i * 0.5 + 0.25, 0.25, 'square', 0.06);
+      }
+    }
+  },
+  {
+    triggers: [/space|sci.?fi|alien/i],
+    name: '🛸 Space Sounds',
+    play(ctx) {
+      for (let i = 0; i < 8; i++) {
+        const freq = 200 + Math.random() * 600;
+        playNote(ctx, freq, i * 0.5, 0.4, 'sine', 0.05);
+        playNote(ctx, freq * 1.5, i * 0.5 + 0.1, 0.3, 'sawtooth', 0.02);
+      }
+    }
+  },
+  {
+    triggers: [/horror|scary|spooky|creepy/i],
+    name: '👻 Spooky Theme',
+    play(ctx) {
+      const notes = [164.81, 155.56, 146.83, 138.59, 130.81, 138.59, 146.83, 155.56, 164.81];
+      notes.forEach((f, i) => {
+        playNote(ctx, f, i * 0.5, 0.6, 'sawtooth', 0.05);
+        playNote(ctx, f * 3.01, i * 0.5, 0.6, 'sine', 0.02); // Dissonant overtone
+      });
+    }
+  },
+  {
+    triggers: [/christmas|jingle|holiday/i],
+    name: '🎄 Jingle Bells',
+    play(ctx) {
+      const melody = ['E4', 'E4', 'E4', 'E4', 'E4', 'E4', 'E4', 'G4', 'C4', 'D4', 'E4', 'F4', 'F4', 'F4', 'F4', 'F4', 'E4', 'E4', 'E4', 'E4', 'D4', 'D4', 'E4', 'D4', 'G4'];
+      melody.forEach((n, i) => playNote(ctx, NOTE_FREQS[n], i * 0.2, 0.22, 'triangle', 0.1));
+      // Bells
+      [0, 0.6, 1.2, 1.8, 2.4].forEach(t => playNote(ctx, NOTE_FREQS.C6, t, 0.15, 'sine', 0.04));
+    }
+  },
+];
+
+function findMusicTemplate(prompt) {
+  for (const t of musicTemplates) {
+    for (const trigger of t.triggers) {
+      if (trigger.test(prompt)) return t;
+    }
+  }
+  return null;
+}
+
+function addMusicChatMessage(text, isUser) {
+  const msgDiv = document.createElement('div');
+  msgDiv.className = `chat-msg ${isUser ? 'user-msg' : 'bot-msg'}`;
+  msgDiv.innerHTML = `
+    <div class="chat-avatar">${isUser ? '👤' : '🎵'}</div>
+    <div class="chat-bubble">${text}</div>
+  `;
+  musicChatMessages.appendChild(msgDiv);
+  musicChatMessages.scrollTop = musicChatMessages.scrollHeight;
+}
+
+function addMusicTypingIndicator() {
+  const typing = document.createElement('div');
+  typing.className = 'chat-msg bot-msg';
+  typing.id = 'music-typing-indicator';
+  typing.innerHTML = `
+    <div class="chat-avatar">🎵</div>
+    <div class="chat-bubble">
+      <div class="typing-dots"><span></span><span></span><span></span></div>
+    </div>
+  `;
+  musicChatMessages.appendChild(typing);
+  musicChatMessages.scrollTop = musicChatMessages.scrollHeight;
+}
+
+function removeMusicTypingIndicator() {
+  const indicator = document.getElementById('music-typing-indicator');
+  if (indicator) indicator.remove();
+}
+
+function playMusicTemplate(template) {
+  stopAllMusic();
+  const ctx = getAudioCtx();
+  analyserNode = ctx.createAnalyser();
+  analyserNode.fftSize = 256;
+  analyserNode.connect(ctx.destination);
+  currentMusicTemplate = template;
+  template.play(ctx);
+  musicTrackName.textContent = template.name;
+  startVisualizer();
+}
+
+function handleMusicSend() {
+  const prompt = musicChatInput.value.trim();
+  if (!prompt) return;
+
+  addMusicChatMessage(prompt, true);
+  musicChatInput.value = '';
+  addMusicTypingIndicator();
+
+  setTimeout(() => {
+    removeMusicTypingIndicator();
+
+    if (/^(help|list|sounds)$/i.test(prompt)) {
+      addMusicChatMessage(
+        "🎵 <b>Everything I can generate:</b><br><br>" +
+        "🎶 <b>Melodies:</b> happy tune, sad melody, lullaby, epic theme, jazz riff<br>" +
+        "🥁 <b>Beats:</b> drum beat, techno beat, hip hop beat<br>" +
+        "🎹 <b>Instruments:</b> piano, guitar strum, synth pad, bell chime<br>" +
+        "🌧️ <b>Nature Sounds:</b> rain, ocean waves, wind, thunder, bird song<br>" +
+        "🎼 <b>Scales:</b> major scale, minor scale, pentatonic scale<br>" +
+        "🎉 <b>Fun Extras:</b> siren, space sounds, spooky theme, jingle bells<br><br>" +
+        "<b>Editing Tools:</b><br>" +
+        "• Click the <b>Piano Keys</b> to play your own notes.<br>" +
+        "• Use the <b>Beat Maker</b> grid to create loops of kick, snare, hat, and bass.<br><br>" +
+        "Just type what you want to hear or start composing above! 🎧",
+        false
+      );
+      return;
+    }
+
+    const template = findMusicTemplate(prompt);
+    if (template) {
+      playMusicTemplate(template);
+      addMusicChatMessage(
+        `🎶 Now playing: <b>${template.name}</b><br>Use the ▶️ Play button to replay, or ⏹️ Stop to pause.`,
+        false
+      );
+    } else {
+      addMusicChatMessage(
+        "I'm not sure how to play that yet! Try asking for:<br><br>" +
+        "🎶 happy tune, sad melody, lullaby<br>" +
+        "🥁 drum beat, techno beat, hip hop<br>" +
+        "🎹 piano, guitar, synth pad<br>" +
+        "🌧️ rain, ocean waves, thunder<br><br>" +
+        "Type <b>help</b> for a full list! 🎵",
+        false
+      );
+    }
+  }, 800);
+}
+
+musicChatSend.addEventListener('click', handleMusicSend);
+musicChatInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') handleMusicSend();
+});
+
+musicPlayBtn.addEventListener('click', () => {
+  if (currentMusicTemplate) playMusicTemplate(currentMusicTemplate);
+});
+
+musicStopBtn.addEventListener('click', () => {
+  stopAllMusic();
+  if (visualizerAnimId) { cancelAnimationFrame(visualizerAnimId); visualizerAnimId = null; }
+  musicVisCtx.fillStyle = '#0d0d14';
+  musicVisCtx.fillRect(0, 0, musicVisualizer.width, musicVisualizer.height);
+});
+
+// ===== Music Editor Logic =====
+const pianoKeyboard = document.getElementById('piano-keyboard');
+const sequencerGrid = document.getElementById('sequencer-grid');
+const seqBpmInput = document.getElementById('seq-bpm');
+const seqPlayBtn = document.getElementById('seq-play-btn');
+const seqStopBtn = document.getElementById('seq-stop-btn');
+const seqClearBtn = document.getElementById('seq-clear-btn');
+
+let sequencerInterval = null;
+let seqStepIndex = 0;
+const seqTotalSteps = 8;
+const sequencerState = {
+  kick: new Array(seqTotalSteps).fill(false),
+  snare: new Array(seqTotalSteps).fill(false),
+  hihat: new Array(seqTotalSteps).fill(false),
+  bass: new Array(seqTotalSteps).fill(false),
+};
+
+// Initialize Sequencer Grid
+document.querySelectorAll('.sequencer-row').forEach(row => {
+  const instr = row.dataset.row;
+  const container = row.querySelector('.seq-steps');
+  for (let i = 0; i < seqTotalSteps; i++) {
+    const step = document.createElement('div');
+    step.className = 'seq-step';
+    step.dataset.index = i;
+    step.onclick = () => {
+      sequencerState[instr][i] = !sequencerState[instr][i];
+      step.classList.toggle('active');
+    };
+    container.appendChild(step);
+  }
+});
+
+// Piano Interaction
+pianoKeyboard.addEventListener('mousedown', (e) => {
+  if (e.target.classList.contains('piano-key')) {
+    const note = e.target.dataset.note;
+    const freq = NOTE_FREQS[note];
+    if (freq) {
+      const ctx = getAudioCtx();
+      analyserNode = analyserNode || ctx.createAnalyser();
+      analyserNode.fftSize = 256;
+      analyserNode.connect(ctx.destination);
+      playNote(ctx, freq, 0, 0.4, 'triangle', 0.15);
+      startVisualizer();
+      e.target.classList.add('active');
+      setTimeout(() => e.target.classList.remove('active'), 150);
+    }
+  }
+});
+
+function runSequencerStep() {
+  const ctx = getAudioCtx();
+  analyserNode = analyserNode || ctx.createAnalyser();
+  analyserNode.fftSize = 256;
+  analyserNode.connect(ctx.destination);
+
+  // Visual highlight
+  document.querySelectorAll('.seq-step').forEach(s => {
+    s.classList.toggle('current', parseInt(s.dataset.index) === seqStepIndex);
+  });
+
+  // Play active sounds
+  if (sequencerState.kick[seqStepIndex]) playDrum(ctx, 150, 0, 0.2);
+  if (sequencerState.snare[seqStepIndex]) playNoise(ctx, 0, 0.08, 0.15);
+  if (sequencerState.hihat[seqStepIndex]) playNoise(ctx, 0, 0.04, 0.05);
+  if (sequencerState.bass[seqStepIndex]) playNote(ctx, NOTE_FREQS.C3, 0, 0.2, 'sine', 0.15);
+
+  seqStepIndex = (seqStepIndex + 1) % seqTotalSteps;
+  startVisualizer();
+}
+
+seqPlayBtn.addEventListener('click', () => {
+  if (sequencerInterval) clearInterval(sequencerInterval);
+  const bpm = parseInt(seqBpmInput.value) || 120;
+  const stepMs = (60000 / bpm) / 2; // 8th notes
+  seqStepIndex = 0;
+  runSequencerStep();
+  sequencerInterval = setInterval(runSequencerStep, stepMs);
+});
+
+seqStopBtn.addEventListener('click', () => {
+  if (sequencerInterval) { clearInterval(sequencerInterval); sequencerInterval = null; }
+  document.querySelectorAll('.seq-step').forEach(s => s.classList.remove('current'));
+  stopAllMusic();
+});
+
+seqClearBtn.addEventListener('click', () => {
+  Object.keys(sequencerState).forEach(k => sequencerState[k].fill(false));
+  document.querySelectorAll('.seq-step').forEach(s => s.classList.remove('active'));
+});
