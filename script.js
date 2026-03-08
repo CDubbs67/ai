@@ -3690,6 +3690,7 @@ const musicChatSend = document.getElementById('music-chat-send');
 const musicPlayBtn = document.getElementById('music-play-btn');
 const musicStopBtn = document.getElementById('music-stop-btn');
 const musicTrackName = document.getElementById('music-track-name');
+const musicRecordBtn = document.getElementById('music-record-btn');
 
 let audioCtx = null;
 let currentNodes = [];
@@ -3697,10 +3698,30 @@ let visualizerAnimId = null;
 let analyserNode = null;
 let currentMusicTemplate = null;
 
+// Recording variables
+let mediaRecorder = null;
+let recordedChunks = [];
+let audioStreamDest = null;
+let isRecording = false;
+
 function getAudioCtx() {
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   if (audioCtx.state === 'suspended') audioCtx.resume();
   return audioCtx;
+}
+
+function ensureAudioNodes() {
+  const ctx = getAudioCtx();
+  if (!analyserNode) {
+    analyserNode = ctx.createAnalyser();
+    analyserNode.fftSize = 256;
+    analyserNode.connect(ctx.destination);
+  }
+  // Setup stream destination for recording
+  if (!audioStreamDest) {
+    audioStreamDest = ctx.createMediaStreamDestination();
+    analyserNode.connect(audioStreamDest);
+  }
 }
 
 function stopAllMusic() {
@@ -4113,9 +4134,7 @@ function removeMusicTypingIndicator() {
 function playMusicTemplate(template) {
   stopAllMusic();
   const ctx = getAudioCtx();
-  analyserNode = ctx.createAnalyser();
-  analyserNode.fftSize = 256;
-  analyserNode.connect(ctx.destination);
+  ensureAudioNodes(); // Use ensureAudioNodes instead of direct analyserNode creation
   currentMusicTemplate = template;
   template.play(ctx);
   musicTrackName.textContent = template.name;
@@ -4229,22 +4248,18 @@ pianoKeyboard.addEventListener('mousedown', (e) => {
     const freq = NOTE_FREQS[note];
     if (freq) {
       const ctx = getAudioCtx();
-      analyserNode = analyserNode || ctx.createAnalyser();
-      analyserNode.fftSize = 256;
-      analyserNode.connect(ctx.destination);
+      ensureAudioNodes(); // Use ensureAudioNodes
       playNote(ctx, freq, 0, 0.4, 'triangle', 0.15);
       startVisualizer();
       e.target.classList.add('active');
-      setTimeout(() => e.target.classList.remove('active'), 150);
+      setTimeout(() => e.classList.remove('active'), 150);
     }
   }
 });
 
 function runSequencerStep() {
   const ctx = getAudioCtx();
-  analyserNode = analyserNode || ctx.createAnalyser();
-  analyserNode.fftSize = 256;
-  analyserNode.connect(ctx.destination);
+  ensureAudioNodes(); // Use ensureAudioNodes
 
   // Visual highlight
   document.querySelectorAll('.seq-step').forEach(s => {
@@ -4279,4 +4294,77 @@ seqStopBtn.addEventListener('click', () => {
 seqClearBtn.addEventListener('click', () => {
   Object.keys(sequencerState).forEach(k => sequencerState[k].fill(false));
   document.querySelectorAll('.seq-step').forEach(s => s.classList.remove('active'));
+});
+
+// Recording Logic
+function startRecording() {
+  ensureAudioNodes();
+  recordedChunks = [];
+
+  try {
+    mediaRecorder = new MediaRecorder(audioStreamDest.stream);
+    mediaRecorder.ondataavailable = (e) => {
+      if (e.data.size > 0) recordedChunks.push(e.data);
+    };
+    mediaRecorder.onstop = () => {
+      const blob = new Blob(recordedChunks, { type: 'audio/webm' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = `AskNova_Music_${new Date().getTime()}.webm`;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      }, 100);
+      recordedChunks = [];
+    };
+
+    mediaRecorder.start();
+    isRecording = true;
+    musicRecordBtn.textContent = '⏹️ Stop Recording';
+    musicRecordBtn.classList.add('recording');
+  } catch (err) {
+    console.error('Recording failed:', err);
+    addMusicChatMessage("❌ Error creating recorder. Your browser might not support recording.", false);
+  }
+}
+
+function stopRecording() {
+  if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+    mediaRecorder.stop();
+  }
+  isRecording = false;
+  musicRecordBtn.textContent = '🔴 Record';
+  musicRecordBtn.classList.remove('recording');
+}
+
+musicRecordBtn.addEventListener('click', () => {
+  if (isRecording) {
+    stopRecording();
+  } else {
+    startRecording();
+    // Hint message
+    if (recordedChunks.length === 0) {
+      addMusicChatMessage("🔴 <b>Recording started!</b> Please play some music using the tools above or ask the bot to play.", false);
+    }
+  }
+});
+
+// Update manual node creations to use ensureAudioNodes
+pianoKeyboard.addEventListener('mousedown', (e) => {
+  if (e.target.classList.contains('piano-key')) {
+    const note = e.target.dataset.note;
+    const freq = NOTE_FREQS[note];
+    if (freq) {
+      const ctx = getAudioCtx();
+      ensureAudioNodes();
+      playNote(ctx, freq, 0, 0.4, 'triangle', 0.15);
+      startVisualizer();
+      e.target.classList.add('active');
+      setTimeout(() => e.target.classList.remove('active'), 150);
+    }
+  }
 });

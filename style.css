@@ -933,6 +933,37 @@ body.theme-rose {
   color: white;
 }
 
+#music-record-btn {
+  background: rgba(255, 68, 68, 0.1);
+  color: #ff4444;
+  border-color: rgba(255, 68, 68, 0.3);
+}
+
+#music-record-btn:hover {
+  background: rgba(255, 68, 68, 0.2);
+}
+
+#music-record-btn.recording {
+  background: #ff4444;
+  color: white;
+  animation: music-pulse 1.5s infinite;
+  border-color: #ff4444;
+}
+
+@keyframes music-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 68, 68, 0.7);
+  }
+
+  70% {
+    box-shadow: 0 0 0 10px rgba(255, 68, 68, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 68, 68, 0);
+  }
+}
+
 .btn-save:hover {
   filter: brightness(1.1);
 }
