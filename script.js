@@ -1245,61 +1245,32 @@ async function fetchFromWikipedia(query) {
 }
 
 // ===== Approved Answer Lookup =====
-const SERVER_URL = window.location.origin;
-let globalReviewData = [];
-
-async function syncWithServer() {
-  try {
-    const response = await fetch(`${SERVER_URL}/api/answers`);
-    if (response.ok) {
-      globalReviewData = await response.json();
-    }
-  } catch (err) {
-    console.error('Failed to sync with server:', err);
-  }
-}
-
-// Sync on startup and every 30 seconds
-syncWithServer();
-setInterval(syncWithServer, 30000);
-
 function findApprovedAnswer(query) {
+  const reviewData = JSON.parse(localStorage.getItem('askNovaReviewAnswers') || '[]');
   const q = query.toLowerCase().trim();
-  const approved = globalReviewData.find(r =>
+  const approved = reviewData.find(r =>
     r.status === 'approved' && r.question.toLowerCase().trim() === q
   );
   return approved ? approved.answer : null;
 }
 
-async function saveToReviewQueue(question, answer, topic) {
-  // Check if it already exists in the global data
-  const exists = globalReviewData.some(r => r.question.toLowerCase().trim() === question.toLowerCase().trim());
+function saveToReviewQueue(question, answer, topic) {
+  const reviewData = JSON.parse(localStorage.getItem('askNovaReviewAnswers') || '[]');
+
+  // Don't save duplicates — check if this question already exists
+  const exists = reviewData.some(r => r.question.toLowerCase().trim() === question.toLowerCase().trim());
   if (exists) return;
 
-  const newItem = {
+  reviewData.push({
     id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
     question: question,
     answer: answer,
     topic: topic || '',
     status: 'pending',
     timestamp: new Date().toISOString()
-  };
+  });
 
-  globalReviewData.push(newItem);
-
-  try {
-    await fetch(`${SERVER_URL}/api/answers`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(globalReviewData)
-    });
-  } catch (err) {
-    console.error('Failed to save review item to server:', err);
-    // Fallback to local storage
-    const localData = JSON.parse(localStorage.getItem('askNovaReviewAnswers') || '[]');
-    localData.push(newItem);
-    localStorage.setItem('askNovaReviewAnswers', JSON.stringify(localData));
-  }
+  localStorage.setItem('askNovaReviewAnswers', JSON.stringify(reviewData));
 }
 
 async function handleSearch() {

@@ -1,17 +1,8 @@
-const SERVER_URL = window.location.origin;
-let reviewData = JSON.parse(localStorage.getItem('askNovaReviewAnswers') || '[]');
+// ===== Review Page Logic =====
+// Data is stored in localStorage under 'askNovaReviewAnswers'
+// Each entry: { id, question, answer, topic, status: 'pending'|'approved'|'rejected', timestamp }
 
-async function loadFromServer() {
-  try {
-    const response = await fetch(`${SERVER_URL}/api/answers`);
-    if (response.ok) {
-      reviewData = await response.json();
-      renderList();
-    }
-  } catch (err) {
-    console.error('Failed to load from server:', err);
-  }
-}
+let reviewData = JSON.parse(localStorage.getItem('askNovaReviewAnswers') || '[]');
 let currentTab = 'pending';
 
 // DOM
@@ -92,10 +83,11 @@ function renderList() {
   }).join('');
 }
 
-async function approveWithEdit(id) {
+function approveWithEdit(id) {
   const textarea = document.getElementById(`edit-${id}`);
   let newAnswer = textarea ? textarea.value.trim() : "";
 
+  // Re-apply highlight if the topic name is in the new text
   const item = reviewData.find(r => r.id === id);
   if (item && item.topic && newAnswer) {
     const escapedTopic = item.topic.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -104,33 +96,24 @@ async function approveWithEdit(id) {
   }
 
   reviewData = reviewData.map(r => r.id === id ? { ...r, answer: newAnswer || r.answer, status: 'approved' } : r);
-  await save();
+  save();
   renderList();
 }
 
-async function setStatus(id, status) {
+function setStatus(id, status) {
   reviewData = reviewData.map(r => r.id === id ? { ...r, status } : r);
-  await save();
+  save();
   renderList();
 }
 
-async function deleteItem(id) {
+function deleteItem(id) {
   reviewData = reviewData.filter(r => r.id !== id);
-  await save();
+  save();
   renderList();
 }
 
-async function save() {
+function save() {
   localStorage.setItem('askNovaReviewAnswers', JSON.stringify(reviewData));
-  try {
-    await fetch(`${SERVER_URL}/api/answers`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(reviewData)
-    });
-  } catch (err) {
-    console.error('Failed to save to server:', err);
-  }
 }
 
 // Tab switching
@@ -145,4 +128,3 @@ tabButtons.forEach(btn => {
 
 // Initial render
 renderList();
-loadFromServer();
